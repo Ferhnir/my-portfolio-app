@@ -5,6 +5,7 @@ export default defineConfig({
     plugins: [vue()],
     server: {
         port: 3000,
-        host: true // Crucial for Docker network bridging
+        host: true,
+        allowedHosts: ['portfolio.test'],
     }
 })
