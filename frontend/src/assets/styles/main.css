@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+    /* Linear-style dark theme token palette definitions */
+    --color-linear-base: #121214;       /* Deep charcoal solid base */
+    --color-linear-surface: #161618;    /* Slightly lighter panel background */
+    --color-linear-border: #262629;     /* Razor-thin subtle border tone */
+    --color-text-muted: #b4b4b8;
+}
+
+body {
+    background-color: var(--color-linear-base);
+    color: #ffffff;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    margin: 0;
+}
