@@ -24,6 +24,7 @@ services:
       context: ./backend/Docker
       dockerfile: Dockerfile
       args:
+        WWWUSER: '${WWWUSER}'
         WWWGROUP: '${WWWGROUP}'
     working_dir: /var/www/html
     volumes:

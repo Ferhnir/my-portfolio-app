@@ -54,6 +54,13 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'frontend_url' => env('FRONTEND_URL', 'http://portfolio.test'),
+
+    'frontend_login_url' => env(
+        'FRONTEND_LOGIN_URL',
+        'http://portfolio.test/login'
+    ),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
