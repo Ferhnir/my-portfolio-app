@@ -1,16 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-    /* Linear-style dark theme token palette definitions */
-    --color-linear-base: #121214;       /* Deep charcoal solid base */
-    --color-linear-surface: #161618;    /* Slightly lighter panel background */
-    --color-linear-border: #262629;     /* Razor-thin subtle border tone */
-    --color-text-muted: #b4b4b8;
+    --color-linear-base: #121214;
+    --color-linear-surface: #161618;
+    --color-linear-border: #262629;
+    --font-cyber-display: "Courier New", Courier, Monaco, monospace;
 }
 
 body {
     background-color: var(--color-linear-base);
     color: #ffffff;
-    font-family: ui-sans-serif, system-ui, sans-serif;
-    margin: 0;
+}
+
+a, button, [role="button"], router-link {
+    -webkit-tap-highlight-color: transparent;
+}
+
+a:focus, button:focus, [role="button"]:focus, .router-link-active:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }

@@ -3,12 +3,42 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
     {
         path: '/',
-        name: 'projects',
+        name: 'cases',
         component: () => import('@/pages/Cases.vue')
     },
     {
-        path: '/resume',
-        name: 'resume',
+        path: '/tech-stack',
+        name: 'tech-stack',
+        component: () => import('@/pages/TechStack.vue')
+    },
+    {
+        path: '/employment',
+        name: 'employment',
+        component: () => import('@/pages/Employment.vue')
+    },
+    {
+        path: '/education',
+        name: 'education',
+        component: () => import('@/pages/Employment.vue')
+    },
+    {
+        path: '/api-docs',
+        name: 'api-docs',
+        component: () => import('@/pages/Employment.vue')
+    },
+    {
+        path: '/contact',
+        name: 'contact',
+        component: () => import('@/pages/Employment.vue')
+    },
+    {
+        path: '/completed-tasks',
+        name: 'completed-tasks',
+        component: () => import('@/pages/Employment.vue')
+    },
+    {
+        path: '/job-applications',
+        name: 'job-applications',
         component: () => import('@/pages/Employment.vue')
     }
 ]
