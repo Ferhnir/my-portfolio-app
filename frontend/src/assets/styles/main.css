@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+    --color-linear-base: #121214;
+    --color-linear-surface: #161618;
+    --color-linear-border: #262629;
+    --font-cyber-display: "Courier New", Courier, Monaco, monospace;
+}
+
+body {
+    background-color: var(--color-linear-base);
+    color: #ffffff;
+}
+
+a, button, [role="button"], router-link {
+    -webkit-tap-highlight-color: transparent;
+}
+
+a:focus, button:focus, [role="button"]:focus, .router-link-active:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}

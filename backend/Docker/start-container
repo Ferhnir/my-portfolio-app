@@ -7,10 +7,6 @@ if [ "$SUPERVISOR_PHP_USER" != "root" ] && [ "$SUPERVISOR_PHP_USER" != "sail" ];
     exit 1
 fi
 
-if [ -n "$WWWUSER" ]; then
-    usermod -u "$WWWUSER" sail
-fi
-
 if [ ! -d /.composer ]; then
     mkdir /.composer
 fi
