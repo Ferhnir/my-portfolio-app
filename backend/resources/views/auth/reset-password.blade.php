@@ -129,26 +129,6 @@
 
         </form>
 
-{{--        @if ($errors->any())--}}
-{{--            <div--}}
-{{--                    class="error-alert"--}}
-{{--                    id="error-alert"--}}
-{{--                    role="alert"--}}
-{{--                    hidden--}}
-{{--            >--}}
-{{--                @foreach ($errors->all() as $error)--}}
-{{--                    <div>--}}
-{{--                        <span class="error-icon" aria-hidden="true">--}}
-{{--                            @include('svg.error')--}}
-{{--                        </span>--}}
-{{--                        <p class="error-title">--}}
-{{--                            {{ $error }}--}}
-{{--                        </p>--}}
-{{--                    </div>--}}
-{{--                @endforeach--}}
-{{--            </div>--}}
-{{--        @endif--}}
-
         @if ($errors->any())
             <div class="error-alert" role="alert">
                 <span class="error-icon" aria-hidden="true">
@@ -167,7 +147,7 @@
                 href="{{ config('app.frontend_login_url') }}"
         >
             <span class="arrow">←</span>
-            BACK TO SIGN IN
+            [ BACK TO SIGN IN ]
         </a>
 
     </section>

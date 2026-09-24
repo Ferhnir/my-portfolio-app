@@ -3,10 +3,11 @@
 
     <!-- View Header Panel -->
     <div class="space-y-2 border-b border-linear-border pb-6">
-      <h1 class="text-xl font-black text-white uppercase tracking-wider font-cyber-display">
+      <h1 class="flex items-center gap-3 text-[22px] font-bold text-linear-text uppercase tracking-tight font-cyber-display">
+        <span class="text-linear-green">//</span>
         ENGINE // VERIFIED TECH STACK
       </h1>
-      <p class="text-xs text-zinc-500 uppercase tracking-widest font-cyber-display">
+      <p class="text-xs text-linear-blue uppercase tracking-wide font-medium font-cyber-display leading-relaxed">
         Core languages, modern frameworks, and isolated container environments.
       </p>
     </div>
@@ -18,18 +19,17 @@
       <div
           v-for="group in techGroups"
           :key="group.id"
-          class="border border-linear-border bg-linear-surface/20 rounded-xl p-6 space-y-4 hover:border-zinc-800 transition-colors duration-200"
+          class="border border-linear-border bg-linear-surface rounded-md p-6 space-y-4 hover:border-linear-border-hover transition-colors duration-200 shadow-[0_20px_70px_rgba(0,0,0,0.28)]"
       >
-        <!-- Group Title (CAPITAL MONO) -->
-        <h2 class="text-xs font-black text-accent-bright uppercase tracking-widest font-cyber-display flex items-center space-x-2">
-          <span class="text-zinc-600">{{ group.id }} //</span>
-          <span class="text-lime-400">{{ group.title }}</span>
+        <h2 class="text-xs font-bold uppercase tracking-widest font-cyber-display flex items-center space-x-2">
+          <span class="text-linear-green">{{ group.id }} //</span>
+          <span class="text-linear-text">{{ group.title }}</span>
         </h2>
 
         <!-- Sub-items inside the group -->
         <div class="space-y-4 pt-2">
           <div v-for="sub in group.subCategories" :key="sub.name" class="space-y-2">
-            <h3 class="text-[14px] font-bold text-red-600 uppercase tracking-wider font-cyber-display">
+            <h3 class="text-[13px] font-bold text-linear-red uppercase tracking-wider font-cyber-display">
               {{ sub.name }}
             </h3>
 
@@ -38,7 +38,7 @@
               <span
                   v-for="tech in sub.items"
                   :key="tech"
-                  class="px-2.5 py-1 text-[14px] font-bold uppercase tracking-wide font-cyber-display bg-linear-surface border border-linear-border text-blue-300 rounded-md shadow-sm hover:text-white hover:border-zinc-700 transition-colors duration-150"
+                  class="px-2.5 py-1 text-[12px] font-medium uppercase tracking-wide font-cyber-display bg-linear-field border border-linear-border text-linear-blue rounded-md hover:text-linear-text hover:border-linear-border-hover transition-colors duration-150"
               >
                 {{ tech }}
               </span>

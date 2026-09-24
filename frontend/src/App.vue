@@ -1,6 +1,7 @@
 <template>
-  <!-- Global Core Shell: Implements the permanent top-centered ambient glowing gradient -->
-  <div class="min-h-screen bg-linear-base bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-800/15 via-linear-base to-linear-base text-zinc-100 flex overflow-hidden">
+  <RouterView v-if="isLogin" />
+
+  <div v-else class="min-h-screen text-linear-text flex overflow-hidden">
 
     <!-- 1. Permanent Navigation Menu Panel Layout Component Slot -->
     <LeftMenu />
@@ -21,7 +22,11 @@
 </template>
 
 <script setup>
-import { RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 import LeftMenu from './components/LeftMenu.vue'
-import TopBar from '@/components/TopBar.vue'
+import TopBar from './components/TopBar.vue'
+
+const route = useRoute()
+const isLogin = computed(() => route.name === 'login')
 </script>
