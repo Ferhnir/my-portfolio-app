@@ -1,10 +1,13 @@
 import { createApp } from 'vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import App from './App.vue'
-import router from './router' // 💡 Ensure this import line is correct
+import router from './router'
+import './icons'
 import './assets/styles/main.css'
 
 const app = createApp(App)
 
-app.use(router) // 💡 CRITICAL: This activates the global router context injectors
+app.component('FontAwesomeIcon', FontAwesomeIcon)
+app.use(router)
 
 app.mount('#app')
