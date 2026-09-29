@@ -206,6 +206,25 @@
     opacity: 0.6;
 }
 
+.auth-screen .forgot-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: -8px 0 18px;
+}
+
+.auth-screen .forgot-link {
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.auth-screen .forgot-link:hover {
+    color: var(--text-primary);
+}
+
 .auth-screen .submit-button .button-arrow {
     position: absolute;
     right: 18px;
@@ -235,6 +254,16 @@
 .auth-screen .error-icon svg {
     width: 19px;
     height: 19px;
+}
+
+.auth-screen .success-alert {
+    margin-top: 10px;
+    padding: 12px;
+    color: var(--green-dark);
+    background-color: #080d11;
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    font-size: 14px;
 }
 
 .auth-screen .bottom-divider {

@@ -7,6 +7,7 @@ import {
     faFileLines,
     faFolderOpen,
     faGraduationCap,
+    faPowerOff,
     faTerminal,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -18,5 +19,6 @@ library.add(
     faFileLines,
     faFolderOpen,
     faGraduationCap,
+    faPowerOff,
     faTerminal,
 )

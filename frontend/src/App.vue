@@ -1,6 +1,6 @@
 <template>
   <Toaster />
-  <RouterView v-if="isLogin" />
+  <RouterView v-if="isAuthScreen" />
 
   <div v-else class="min-h-screen text-linear-text flex overflow-hidden">
 
@@ -30,5 +30,5 @@ import Toaster from './components/Toaster.vue'
 import TopBar from './components/TopBar.vue'
 
 const route = useRoute()
-const isLogin = computed(() => route.name === 'login')
+const isAuthScreen = computed(() => route.name === 'login' || route.name === 'forgot-password')
 </script>

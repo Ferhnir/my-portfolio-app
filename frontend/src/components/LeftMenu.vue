@@ -42,12 +42,18 @@
 
       <button
           type="button"
-          class="flex w-full items-center justify-center px-3 py-2.5 text-[11px] font-bold uppercase tracking-widest font-cyber-display text-linear-base transition-colors duration-150 disabled:opacity-60"
+          class="group relative flex w-full cursor-pointer items-center justify-center gap-3 overflow-hidden px-3 py-2.5 text-[11px] font-bold uppercase tracking-widest font-cyber-display text-linear-base disabled:opacity-60 disabled:pointer-events-none"
           :class="isAuthenticated ? 'bg-linear-green' : 'bg-linear-red'"
           :disabled="pending"
           @click="onAuthButton"
       >
-        {{ isAuthenticated ? 'LOG OFF' : 'LOG IN' }}
+        <span class="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-150 group-hover:bg-black/25" aria-hidden="true"></span>
+        <FontAwesomeIcon
+            :icon="['fas', 'power-off']"
+            class="relative text-black"
+            style="height: 1.5em; width: 1.875em;"
+        />
+        <span class="relative">{{ isAuthenticated ? 'LOG OFF' : 'LOG IN' }}</span>
       </button>
     </div>
   </aside>
