@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { setToken } from '@/auth'
 import { api } from '@/api/client'
 import '@/assets/styles/auth-card.css'
 
@@ -24,16 +25,14 @@ async function submit() {
         const body = await api('/login', {
             method: 'POST',
             auth: false,
+            toast: false,
             body: {
                 email: email.value,
                 password: password.value,
             },
         })
 
-        const token = body.data?.sanctum_token || body.sanctum_token
-        if (token) {
-            localStorage.setItem('sanctum_token', token)
-        }
+        setToken(body.data?.sanctum_token || body.sanctum_token || '')
 
         await router.push({ name: 'cases' })
     } catch (error) {

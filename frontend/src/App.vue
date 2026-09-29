@@ -1,4 +1,5 @@
 <template>
+  <Toaster />
   <RouterView v-if="isLogin" />
 
   <div v-else class="min-h-screen text-linear-text flex overflow-hidden">
@@ -25,6 +26,7 @@
 import { computed } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import LeftMenu from './components/LeftMenu.vue'
+import Toaster from './components/Toaster.vue'
 import TopBar from './components/TopBar.vue'
 
 const route = useRoute()

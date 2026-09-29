@@ -1,3 +1,5 @@
+import { toastApiError } from '@/toast'
+
 const baseUrl = import.meta.env.VITE_API_URL || 'https://api.portfolio.test'
 
 export class ApiError extends Error {
@@ -9,7 +11,7 @@ export class ApiError extends Error {
     }
 }
 
-export async function api(path, { method = 'GET', body, auth = true } = {}) {
+export async function api(path, { method = 'GET', body, auth = true, toast = true } = {}) {
     const headers = {
         Accept: 'application/json',
     }
@@ -35,11 +37,17 @@ export async function api(path, { method = 'GET', body, auth = true } = {}) {
     const payload = await response.json().catch(() => ({}))
 
     if (!response.ok) {
-        throw new ApiError(
+        const error = new ApiError(
             payload.message || 'Request failed.',
             response.status,
             payload.errors || {},
         )
+
+        if (toast) {
+            toastApiError(error)
+        }
+
+        throw error
     }
 
     return payload

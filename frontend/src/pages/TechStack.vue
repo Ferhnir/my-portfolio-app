@@ -36,9 +36,17 @@
           <span class="text-linear-text">{{ group.name }}</span>
         </h2>
 
-        <div class="space-y-4 pt-2">
+        <VueDraggable
+            v-model="group.categories"
+            :animation="150"
+            group="tech-stack-categories"
+            handle=".category-handle"
+            :data-group-id="group.id"
+            class="min-h-10 space-y-4 pt-2"
+            @end="onCategoryDrop"
+        >
           <div v-for="link in group.categories" :key="link.id" class="space-y-2">
-            <h3 class="text-[13px] font-bold text-linear-red uppercase tracking-wider font-cyber-display">
+            <h3 class="category-handle cursor-grab text-[13px] font-bold text-linear-red uppercase tracking-wider font-cyber-display active:cursor-grabbing">
               {{ link.category.name }}
             </h3>
 
@@ -52,7 +60,7 @@
               </span>
             </div>
           </div>
-        </div>
+        </VueDraggable>
       </div>
     </div>
 
@@ -61,15 +69,65 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { VueDraggable } from 'vue-draggable-plus'
 import { api } from '@/api/client'
 
 const techGroups = ref([])
 const loading = ref(true)
 const errorMessage = ref('')
 
+function renumber(categories) {
+    categories.forEach((item, index) => {
+        item.sort_order = index + 1
+    })
+}
+
+async function onCategoryDrop(event) {
+    const fromId = Number(event.from?.dataset?.groupId)
+    const toId = Number(event.to?.dataset?.groupId)
+    const { oldIndex, newIndex } = event
+
+    if (oldIndex == null || newIndex == null) {
+        return
+    }
+
+    if (fromId === toId && oldIndex === newIndex) {
+        return
+    }
+
+    const source = techGroups.value.find((group) => group.id === fromId)
+    const destination = techGroups.value.find((group) => group.id === toId)
+    const link = destination?.categories?.[newIndex]
+
+    if (!source || !destination || !link) {
+        return
+    }
+
+    const body = { sort_order: newIndex + 1 }
+
+    if (fromId !== toId) {
+        body.group_id = toId
+    }
+
+    try {
+        await api(`/tech-stack-group-category/${link.id}`, {
+            method: 'PATCH',
+            body,
+        })
+
+        renumber(source.categories)
+        if (source !== destination) {
+            renumber(destination.categories)
+        }
+    } catch {
+        const [moved] = destination.categories.splice(newIndex, 1)
+        source.categories.splice(oldIndex, 0, moved)
+    }
+}
+
 onMounted(async () => {
     try {
-        const body = await api('/tech-stack', { auth: false })
+        const body = await api('/tech-stack', { auth: false, toast: false })
         techGroups.value = body.data ?? []
     } catch (error) {
         errorMessage.value = error.message || 'Could not load the tech stack.'

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Exceptions\ApiException;
 use App\Models\TechStackCategory;
 use App\Models\TechStackGroup;
 use App\Models\TechStackGroupCategory;
@@ -10,15 +9,18 @@ use App\Models\TechStackGroupCategory;
 class TechStackGroupCategoryService
 {
     private TechStackGroupCategory $techStackGroupCategory;
+
     private TechStackGroup $techStackGroup;
+
     private TechStackCategory $techStackCategory;
+
     private ?int $sortOrder;
 
     public function __construct()
     {
-        $this->techStackGroupCategory = new TechStackGroupCategory();
-        $this->techStackGroup = new TechStackGroup();
-        $this->techStackCategory = new TechStackCategory();
+        $this->techStackGroupCategory = new TechStackGroupCategory;
+        $this->techStackGroup = new TechStackGroup;
+        $this->techStackCategory = new TechStackCategory;
         $this->sortOrder = null;
     }
 
@@ -31,7 +33,7 @@ class TechStackGroupCategoryService
 
     public function setTechStackGroup(int|TechStackGroup $techStackGroup): self
     {
-        if (!$techStackGroup instanceof TechStackGroup) {
+        if (! $techStackGroup instanceof TechStackGroup) {
             $techStackGroup = TechStackGroup::query()->findOrFail($techStackGroup);
         }
 
@@ -85,7 +87,7 @@ class TechStackGroupCategoryService
             $attributes['sort_order'] = $this->techStackGroup->techStackGroupCategories()->max('sort_order') + 1;
         }
 
-        if ($this->techStackGroup->exists){
+        if ($this->techStackGroup->exists) {
             $attributes['group_id'] = $this->techStackGroup->getAttribute('id');
         }
 
@@ -102,20 +104,34 @@ class TechStackGroupCategoryService
     public function updateLink(): TechStackGroupCategory
     {
         $oldOrder = (int) $this->techStackGroupCategory->getAttribute('sort_order');
-        $newOrder = (int) $this->sortOrder;
+        $currentGroup = $this->techStackGroupCategory->techStackGroup;
+        $destination = $this->techStackGroup->exists ? $this->techStackGroup : $currentGroup;
 
-        if ($oldOrder !== $this->sortOrder) {
+        if ($destination->id !== $currentGroup->id) {
+            $currentGroup->techStackGroupCategories()
+                ->where('sort_order', '>', $oldOrder)
+                ->decrement('sort_order');
+
+            if ($this->sortOrder !== null) {
+                $destination->techStackGroupCategories()
+                    ->where('sort_order', '>=', $this->sortOrder)
+                    ->increment('sort_order');
+
+                $this->techStackGroupCategory->setAttribute('sort_order', $this->sortOrder);
+            }
+
+            $this->techStackGroupCategory->setAttribute('group_id', $destination->id);
+        } elseif ($this->sortOrder !== null && $oldOrder !== $this->sortOrder) {
             self::reShuffle(
-                techStackGroup: $this->techStackGroup,
+                techStackGroup: $currentGroup,
                 oldOrder: $oldOrder,
-                newOrder: $newOrder,
+                newOrder: $this->sortOrder,
             );
+
+            $this->techStackGroupCategory->setAttribute('sort_order', $this->sortOrder);
         }
 
-        $this->techStackGroupCategory->update([
-            'sort_order' => $newOrder,
-            'group_id' => $this->techStackGroup->getAttribute('id'),
-        ]);
+        $this->techStackGroupCategory->save();
 
         return $this->techStackGroupCategory->refresh();
     }

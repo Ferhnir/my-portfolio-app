@@ -1,6 +1,6 @@
 <template>
-  <aside class="w-64 border-r border-linear-border bg-linear-surface/80 p-4 flex flex-col justify-between select-none h-screen sticky top-0">
-    <div class="space-y-6">
+  <aside class="w-64 border-r border-linear-border bg-linear-surface/80 flex flex-col justify-between select-none h-screen sticky top-0">
+    <div class="space-y-6 p-4">
 
       <div class="flex items-center gap-2 px-2 py-1.5 font-cyber-display text-xs font-bold tracking-wider text-linear-text uppercase">
         <span class="text-linear-green font-bold">//</span>
@@ -41,16 +41,57 @@
       </div>
     </div>
 
-    <!-- Technical System Footer Matrix Metadata Details -->
-    <div class="text-[9px] text-linear-muted font-cyber-display px-3 tracking-widest uppercase">
-      SYS // L13.V6.T4
+    <div class="space-y-0">
+      <div class="text-[9px] text-linear-muted font-cyber-display px-3 tracking-widest uppercase">
+        SYS // L13.V6.T4
+      </div>
+
+      <button
+          type="button"
+          class="flex w-full items-center justify-center px-3 py-2.5 text-[11px] font-bold uppercase tracking-widest font-cyber-display text-linear-base transition-colors duration-150 disabled:opacity-60"
+          :class="isAuthenticated ? 'bg-linear-green' : 'bg-linear-red'"
+          :disabled="pending"
+          @click="onAuthButton"
+      >
+        {{ isAuthenticated ? 'LOG OFF' : 'LOG IN' }}
+      </button>
     </div>
   </aside>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import { isAuthenticated, setToken } from '@/auth'
+import { api, ApiError } from '@/api/client'
+import { toastApiError } from '@/toast'
+
+const router = useRouter()
+const pending = ref(false)
+
+async function onAuthButton() {
+    if (pending.value) {
+        return
+    }
+
+    if (!isAuthenticated.value) {
+        await router.push({ name: 'login' })
+        return
+    }
+
+    pending.value = true
+
+    try {
+        await api('/logout', { method: 'POST', toast: false })
+    } catch (error) {
+        if (!(error instanceof ApiError && error.status === 401)) {
+            toastApiError(error)
+        }
+    } finally {
+        setToken('')
+        pending.value = false
+    }
+}
 
 // 💡 Split JSON layout grouping navigation array with raw monochrome SVG path assets
 const menuGroups = ref([

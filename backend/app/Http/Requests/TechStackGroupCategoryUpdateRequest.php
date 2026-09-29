@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\TechStackCategory;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,7 +37,7 @@ class TechStackGroupCategoryUpdateRequest extends FormRequest
                 'exists:tech_stack_groups,id',
                 Rule::unique('tech_stack_group_category', 'group_id')
                     ->where('category_id', $this->route('techStackGroupCategory')->category_id)
-                    ->ignore($this->route('techStackGroupCategory')->group_id, 'group_id'),
+                    ->ignore($this->route('techStackGroupCategory')->id),
             ],
             'sort_order' => ['required', 'integer', 'min:0'],
         ];
@@ -47,7 +46,7 @@ class TechStackGroupCategoryUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'group_id.unique' => 'The selected category is already attached to this group.'
+            'group_id.unique' => 'The selected category is already attached to this group.',
         ];
     }
 }
