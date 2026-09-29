@@ -2,48 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TechnologyStoreRequest;
+use App\Http\Resources\TechnologyResource;
 use App\Models\Technology;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class TechnologyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
-        //
+        return TechnologyResource::collection(
+            Technology::query()->orderBy('name')->get()
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(TechnologyStoreRequest $request): TechnologyResource
     {
-        //
+        $technology = Technology::query()->create([
+            'name' => $request->input('name'),
+            'slug' => Str::slug($request->input('name')),
+        ]);
+
+        return new TechnologyResource($technology);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Technology $technology)
+    public function show(Technology $technology): TechnologyResource
     {
-        //
+        return new TechnologyResource($technology);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Technology $technology)
+    public function update(Request $request, Technology $technology): TechnologyResource
     {
-        //
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+
+        $technology->update([
+            'name' => $data['name'],
+            'slug' => Str::slug($data['name']),
+        ]);
+
+        return new TechnologyResource($technology);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Technology $technology)
+    public function destroy(Technology $technology): Response
     {
-        //
+        $technology->delete();
+
+        return response()->noContent();
     }
 }
