@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { api } from '@/api/client'
 import '@/assets/styles/auth-card.css'
 
 const router = useRouter()
@@ -11,8 +12,6 @@ const showPassword = ref(false)
 const errorMessage = ref('')
 const submitting = ref(false)
 
-const apiBase = import.meta.env.VITE_API_URL || 'https://api.portfolio.test'
-
 function togglePassword() {
     showPassword.value = !showPassword.value
 }
@@ -22,24 +21,14 @@ async function submit() {
     submitting.value = true
 
     try {
-        const response = await fetch(`${apiBase}/api/login`, {
+        const body = await api('/login', {
             method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+            auth: false,
+            body: {
                 email: email.value,
                 password: password.value,
-            }),
+            },
         })
-
-        const body = await response.json().catch(() => ({}))
-
-        if (!response.ok) {
-            errorMessage.value = body.message || 'Invalid credentials'
-            return
-        }
 
         const token = body.data?.sanctum_token || body.sanctum_token
         if (token) {
@@ -47,8 +36,8 @@ async function submit() {
         }
 
         await router.push({ name: 'cases' })
-    } catch {
-        errorMessage.value = 'Login failed. Please try again later.'
+    } catch (error) {
+        errorMessage.value = error.message || 'Login failed. Please try again later.'
     } finally {
         submitting.value = false
     }
