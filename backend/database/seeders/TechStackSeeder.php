@@ -17,7 +17,7 @@ class TechStackSeeder extends Seeder
         $groups = [
             [
                 'name' => 'Backend Ecosystem',
-                'categories' => [
+                'techStackCategories' => [
                     'Core Languages' => ['PHP', 'SQL', 'PYTHON'],
                     'Frameworks' => ['Laravel', 'Symfony', 'Lumen', 'Slim 4'],
                     'Architecture & Packages' => ['RESTful APIs', 'Fortify', 'Sanctum', 'PHPUnit / PEST', 'BREEZE'],
@@ -26,7 +26,7 @@ class TechStackSeeder extends Seeder
             ],
             [
                 'name' => 'Frontend Engineering',
-                'categories' => [
+                'techStackCategories' => [
                     'Core Languages' => ['JavaScript (ES6+)', 'HTML5', 'CSS3'],
                     'Frameworks & Preprocessors' => ['Vue 3 (Composition API)', 'React', 'Tailwind CSS', 'SCSS'],
                     'Build Tools' => ['Vite', 'NPM', 'PostCSS'],
@@ -34,14 +34,14 @@ class TechStackSeeder extends Seeder
             ],
             [
                 'name' => 'Data Systems & Caching',
-                'categories' => [
+                'techStackCategories' => [
                     'Relational Databases' => ['MySQL', 'Postgres', 'MariaDB'],
                     'In-Memory Engines' => ['Redis', 'Redis Queues', 'Session Storage'],
                 ],
             ],
             [
                 'name' => 'DevOps & Systems Control',
-                'categories' => [
+                'techStackCategories' => [
                     'Virtualization & OS' => ['Docker', 'Docker Compose', 'WSL 2 (Ubuntu)'],
                     'Web Proxies & Engineering Tools' => ['Caddy Server', 'Git / GitHub', 'CI/CD Pipelines'],
                     'AI Coding Efficiency' => ['Claude Code', 'Cursor IDE', 'Prompt Engineering'],
@@ -57,7 +57,7 @@ class TechStackSeeder extends Seeder
 
             $categoryOrder = 1;
 
-            foreach ($groupData['categories'] as $categoryName => $technologyNames) {
+            foreach ($groupData['techStackCategories'] as $categoryName => $technologyNames) {
                 $category = TechStackCategory::query()->updateOrCreate(
                     ['slug' => Str::slug($categoryName)],
                     ['name' => $categoryName],

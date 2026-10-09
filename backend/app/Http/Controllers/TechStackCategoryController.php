@@ -11,10 +11,13 @@ use Illuminate\Support\Str;
 
 class TechStackCategoryController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         return TechStackCategoryResource::collection(
-            TechStackCategory::query()->orderBy('name')->get()
+            TechStackCategory::query()
+                ->unassigned($request, 'techStackGroupLinks')
+                ->orderBy('name')
+                ->get()
         );
     }
 

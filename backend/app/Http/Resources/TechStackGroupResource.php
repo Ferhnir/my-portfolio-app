@@ -17,7 +17,7 @@ class TechStackGroupResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'sort_order' => $this->sort_order,
-            'categories' => TechStackGroupCategoryResource::collection($this->whenLoaded('techStackGroupCategories')),
+            'categories' => TechStackGroupCategoryResource::collection($this->whenLoaded('techStackGroupLinks')),
         ];
     }
 }

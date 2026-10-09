@@ -36,6 +36,7 @@ class TechStackGroupCategoryStoreRequest extends FormRequest
                     $this->route('techStackGroup')->id,
                 ),
             ],
+            'sort_order' => 'required|integer|min:1',
         ];
     }
 

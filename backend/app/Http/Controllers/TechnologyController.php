@@ -12,10 +12,13 @@ use Illuminate\Support\Str;
 
 class TechnologyController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         return TechnologyResource::collection(
-            Technology::query()->orderBy('name')->get()
+            Technology::query()
+                ->unassigned($request, 'techStackPlacements')
+                ->orderBy('name')
+                ->get()
         );
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\TechStackGroupCategory;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,7 +20,7 @@ class TechStackGroupCategoryUpdateRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'category_id' => $this->route('techStackGroupCategory')->category_id,
+            TechStackGroupCategory::LINKABLE_MODEL_KEY => $this->route('techStackGroupCategory')->category_id,
         ]);
     }
 
@@ -31,22 +32,23 @@ class TechStackGroupCategoryUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_id' => [
+            TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY => [
                 'sometimes',
                 'integer',
                 'exists:tech_stack_groups,id',
-                Rule::unique('tech_stack_group_category', 'group_id')
+                Rule::unique('tech_stack_group_category', TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY)
                     ->where('category_id', $this->route('techStackGroupCategory')->category_id)
                     ->ignore($this->route('techStackGroupCategory')->id),
             ],
-            'sort_order' => ['required', 'integer', 'min:0'],
+            TechStackGroupCategory::SORTABLE_COLUMN => ['required', 'integer', 'min:0'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'group_id.unique' => 'The selected category is already attached to this group.',
+            TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY.'.unique'
+                => 'The selected category is already attached to this group.',
         ];
     }
 }

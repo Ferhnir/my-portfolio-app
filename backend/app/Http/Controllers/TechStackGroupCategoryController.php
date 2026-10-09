@@ -9,15 +9,17 @@ use App\Http\Resources\TechStackGroupCategoryResource;
 use App\Models\TechStackCategory;
 use App\Models\TechStackGroup;
 use App\Models\TechStackGroupCategory;
-use App\Services\TechStackGroupCategoryService;
+use App\Services\ModelLinkService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use Throwable;
+use Exception;
 
 class TechStackGroupCategoryController extends Controller
 {
     /**
-     * @throws ApiException
+     * @throws ApiException|Throwable
      */
     public function store(
         TechStackGroupCategoryStoreRequest $request,
@@ -27,14 +29,72 @@ class TechStackGroupCategoryController extends Controller
 
         try {
 
-            $techStackGroupCategory = new TechStackGroupCategoryService()
-                ->setTechStackGroup($techStackGroup)
-                ->setTechStackCategory($techStackCategory)
-                ->saveLink();
+            $modelLinkService = new ModelLinkService(new TechStackGroupCategory())
+                ->setLinkModel(
+                    linkableModel: $techStackGroup,
+                    linkModelKey: TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY
+                )
+                ->setLinkModel(
+                    linkableModel: $techStackCategory,
+                    linkModelKey: TechStackGroupCategory::LINKABLE_MODEL_KEY
+                )
+                ->setSortOrder($request->input(key: TechStackGroupCategory::SORTABLE_COLUMN));
+
+            $techStackGroupCategory = DB::transaction( fn() => $modelLinkService->createLink());
+
 
             $techStackGroupCategory->load([
                 'techStackGroup',
-                'techStackCategory'
+                'techStackCategory',
+            ]);
+
+            return new TechStackGroupCategoryResource($techStackGroupCategory);
+
+        } catch (Exception|Throwable $e) {
+            throw new ApiException(
+                message: __('exceptions.something_went_wrong'),
+                status: ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                errors: [$e->getMessage()],
+            );
+        }
+    }
+
+    /**
+     * @throws ApiException
+     * @throws Throwable
+     */
+    public function update(
+        TechStackGroupCategoryUpdateRequest $request,
+        TechStackGroupCategory $techStackGroupCategory
+    ): TechStackGroupCategoryResource {
+
+        try {
+
+            $modelLinkService = new ModelLinkService($techStackGroupCategory);
+
+            //Re-assign category to different group
+            if ($request->filled(TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY)) {
+
+                $linkableModel = TechStackGroup::query()->findOrFail(
+                    $request->input(TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY)
+                );
+
+                $modelLinkService->setLinkModel(
+                    linkableModel: $linkableModel,
+                    linkModelKey: TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY
+                );
+            }
+
+            //Update Sort Order vba
+            if ($request->filled(TechStackGroupCategory::SORTABLE_COLUMN)) {
+                $modelLinkService->setSortOrder($request->input(TechStackGroupCategory::SORTABLE_COLUMN));
+            }
+
+            $techStackGroupCategory = DB::transaction(fn () => $modelLinkService->updateLink());
+
+            $techStackGroupCategory->load([
+                'techStackGroup',
+                'techStackCategory',
             ]);
 
             return new TechStackGroupCategoryResource($techStackGroupCategory);
@@ -49,52 +109,11 @@ class TechStackGroupCategoryController extends Controller
     }
 
     /**
-     * @throws ApiException
-     * @throws \Throwable
+     * @throws Throwable
      */
-    public function update(
-        TechStackGroupCategoryUpdateRequest $request,
-        TechStackGroupCategory $techStackGroupCategory
-    ): TechStackGroupCategoryResource
-    {
-        try {
-
-            $techStackGroupCategoryService = new TechStackGroupCategoryService()
-                ->loadConnector($techStackGroupCategory);
-
-            $techStackGroupCategory = DB::transaction(function () use (
-                $request, $techStackGroupCategory, $techStackGroupCategoryService
-            ){
-                if ($request->filled('group_id')) {
-                    $techStackGroupCategoryService->setTechStackGroup($request->input('group_id'));
-                }
-
-                $techStackGroupCategoryService->setSortOrder($request->input('sort_order'));
-
-                return $techStackGroupCategoryService->updateLink();
-            });
-
-            $techStackGroupCategory->load([
-                'techStackGroup',
-                'techStackCategory'
-            ]);
-
-            return new TechStackGroupCategoryResource($techStackGroupCategory);
-
-        } catch (\Exception $e) {
-            throw new ApiException(
-                message: __('exceptions.something_went_wrong'),
-                status: ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
-                errors: [$e->getMessage()],
-            );
-        }
-    }
-
     public function destroy(TechStackGroupCategory $techStackGroupCategory): Response
     {
-        new TechStackGroupCategoryService()
-            ->loadConnector($techStackGroupCategory)
-            ->deleteLink();
+        DB::transaction(fn () => $techStackGroupCategory->delete());
 
         return response()->noContent();
     }

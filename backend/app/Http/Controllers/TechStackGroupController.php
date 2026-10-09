@@ -40,8 +40,8 @@ class TechStackGroupController extends Controller
     {
         $techStackGroup->load(
             relations: [
-                'techStackGroupCategories.techStackCategory',
-                'techStackGroupCategories.techStackPlacements.technology',
+                'techStackGroupLinks.techStackCategory',
+                'techStackGroupLinks.techStackPlacements.technology',
             ]
         );
 

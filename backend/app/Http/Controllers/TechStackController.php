@@ -12,8 +12,8 @@ class TechStackController extends Controller
     {
         $groups = TechStackGroup::query()
             ->with([
-                'techStackGroupCategories.techStackCategory',
-                'techStackGroupCategories.techStackPlacements.technology',
+                'techStackGroupLinks.techStackCategory',
+                'techStackGroupLinks.techStackPlacements.technology',
             ])
             ->orderBy('sort_order')
             ->get();

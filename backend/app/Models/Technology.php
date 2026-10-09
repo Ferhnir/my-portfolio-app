@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\HasUnassignedRelation;
 use Database\Factories\TechnologyFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Technology extends Model
 {
     /** @use HasFactory<TechnologyFactory> */
-    use HasFactory;
+    use HasFactory, HasUnassignedRelation;
 
     public function techStackPlacements(): HasMany
     {
