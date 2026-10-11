@@ -1,10 +1,25 @@
 import { reactive } from 'vue'
 
-export const toasts = reactive([])
+interface ApiFailureError extends Error {
+    status: number
+    errors?: Record<string, string[]>
+}
+
+function isApiFailure(error: unknown): error is ApiFailureError {
+    return error instanceof Error && 'status' in error && typeof error.status === 'number'
+}
+
+export interface Toast {
+    id: number
+    title: string
+    message: string
+}
+
+export const toasts = reactive<Toast[]>([])
 
 let nextId = 0
 
-export function dismissToast(id) {
+export function dismissToast(id: number) {
     const index = toasts.findIndex((toast) => toast.id === id)
 
     if (index !== -1) {
@@ -12,7 +27,7 @@ export function dismissToast(id) {
     }
 }
 
-export function pushToast({ title, message, timeout = 6000 }) {
+export function pushToast({ title, message, timeout = 6000 }: { title: string, message: string, timeout?: number }) {
     const id = ++nextId
 
     toasts.unshift({ id, title, message })
@@ -24,14 +39,14 @@ export function pushToast({ title, message, timeout = 6000 }) {
     return id
 }
 
-function validationLines(error) {
+function validationLines(error: ApiFailureError) {
     const lines = Object.values(error.errors ?? {}).flat().filter(Boolean)
 
     return [...new Set(lines)]
 }
 
-export function toastApiError(error) {
-    if (error?.status === 401) {
+export function toastApiError(error: unknown) {
+    if (isApiFailure(error) && error.status === 401) {
         pushToast({
             title: 'UNAUTHORIZED',
             message: error.message || 'You are not signed in.',
@@ -39,7 +54,7 @@ export function toastApiError(error) {
         return
     }
 
-    if (error?.status === 422) {
+    if (isApiFailure(error) && error.status === 422) {
         const lines = validationLines(error)
 
         pushToast({
@@ -53,6 +68,6 @@ export function toastApiError(error) {
 
     pushToast({
         title: 'REQUEST FAILED',
-        message: error?.message || 'Request failed.',
+        message: error instanceof Error ? error.message : 'Request failed.',
     })
 }

@@ -1,8 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { setToken } from '@/auth'
 import { api } from '@/api/client'
+import type { ApiResponse } from '@/api/client'
 import '@/assets/styles/auth-card.css'
 
 const router = useRouter()
@@ -22,7 +23,7 @@ async function submit() {
     submitting.value = true
 
     try {
-        const body = await api('/login', {
+        const body = await api<ApiResponse<{ sanctum_token?: string }> & { sanctum_token?: string }>('/login', {
             method: 'POST',
             auth: false,
             toast: false,
@@ -36,7 +37,7 @@ async function submit() {
 
         await router.push({ name: 'cases' })
     } catch (error) {
-        errorMessage.value = error.message || 'Login failed. Please try again later.'
+        errorMessage.value = error instanceof Error ? error.message : 'Login failed. Please try again later.'
     } finally {
         submitting.value = false
     }

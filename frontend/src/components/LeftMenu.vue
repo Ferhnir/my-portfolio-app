@@ -43,7 +43,7 @@
       <button
           type="button"
           class="group relative flex w-full cursor-pointer items-center justify-center gap-3 overflow-hidden px-3 py-2.5 text-[11px] font-bold uppercase tracking-widest font-cyber-display text-linear-base disabled:opacity-60 disabled:pointer-events-none"
-          :class="isAuthenticated ? 'bg-linear-green' : 'bg-linear-red'"
+          :class="isAuthenticated ? 'bg-linear-red' : 'bg-linear-green'"
           :disabled="pending"
           @click="onAuthButton"
       >
@@ -59,7 +59,7 @@
   </aside>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { isAuthenticated, setToken } from '@/auth'

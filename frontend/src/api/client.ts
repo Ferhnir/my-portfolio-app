@@ -2,8 +2,28 @@ import { toastApiError } from '@/toast'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'https://api.portfolio.test'
 
+export interface ApiResponse<T> {
+    data: T
+    message?: string
+}
+
+interface ApiFailure {
+    message?: string
+    errors?: Record<string, string[]>
+}
+
+export interface ApiRequest {
+    method?: string
+    body?: unknown
+    auth?: boolean
+    toast?: boolean
+}
+
 export class ApiError extends Error {
-    constructor(message, status, errors = {}) {
+    status: number
+    errors: Record<string, string[]>
+
+    constructor(message: string, status: number, errors: Record<string, string[]> = {}) {
         super(message)
         this.name = 'ApiError'
         this.status = status
@@ -11,8 +31,8 @@ export class ApiError extends Error {
     }
 }
 
-export async function api(path, { method = 'GET', body, auth = true, toast = true } = {}) {
-    const headers = {
+export async function api<T>(path: string, { method = 'GET', body, auth = true, toast = true }: ApiRequest = {}): Promise<T> {
+    const headers: Record<string, string> = {
         Accept: 'application/json',
     }
 
@@ -34,7 +54,7 @@ export async function api(path, { method = 'GET', body, auth = true, toast = tru
         body: body === undefined ? undefined : JSON.stringify(body),
     })
 
-    const payload = await response.json().catch(() => ({}))
+    const payload = await response.json().catch(() => ({})) as ApiFailure & T
 
     if (!response.ok) {
         const error = new ApiError(

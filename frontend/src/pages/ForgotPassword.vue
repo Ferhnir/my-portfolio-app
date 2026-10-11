@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { api } from '@/api/client'
 import '@/assets/styles/auth-card.css'
@@ -14,7 +14,7 @@ async function submit() {
     submitting.value = true
 
     try {
-        const body = await api('/forgot-password', {
+        const body = await api<{ message?: string }>('/forgot-password', {
             method: 'POST',
             auth: false,
             toast: false,
@@ -25,7 +25,7 @@ async function submit() {
 
         successMessage.value = body.message || 'Password reset link sent to your email'
     } catch (error) {
-        errorMessage.value = error.message || 'Password reset request failed. Please try again later.'
+        errorMessage.value = error instanceof Error ? error.message : 'Password reset request failed. Please try again later.'
     } finally {
         submitting.value = false
     }
