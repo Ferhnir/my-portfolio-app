@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             TechStackSeeder::class,
             EducationHistorySeeder::class,
+            CourseSeeder::class,
+            CertificateSeeder::class,
         ]);
     }
 }

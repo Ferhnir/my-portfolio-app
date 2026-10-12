@@ -1,0 +1,332 @@
+{
+  "info": {
+    "name": "Certificates",
+    "description": "Folder for the certificate routes. Import this file, then drag the Certificates folder into your existing collection. Requests send Authorization: Bearer {{sanctum_token}} and call {{base_url}}/api. Create saves the new id into {{certificate_id}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Certificates",
+      "description": "Authenticated CRUD for certificates. sort_order is 1-based. Omit it, or send 0, to append. Delete is a soft delete and closes the gap.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{sanctum_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List certificates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/certificates",
+            "description": "Returns every certificate ordered by sort_order."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/certificates"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Example Certificate\",\n      \"issuer\": \"Example Issuer\",\n      \"issued_at\": \"2021-06-01\",\n      \"expires_at\": \"2024-06-01\",\n      \"credential_id\": \"EX-001\",\n      \"credential_url\": \"https://example.com/certificates/ex-001\",\n      \"description\": null,\n      \"sort_order\": 1\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create certificate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "    pm.collectionVariables.set('certificate_id', String(body.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example Certificate\",\n  \"issuer\": \"Example Issuer\",\n  \"issued_at\": \"2021-06-01\",\n  \"expires_at\": \"2024-06-01\",\n  \"credential_id\": \"EX-001\",\n  \"credential_url\": \"https://example.com/certificates/ex-001\",\n  \"description\": null,\n  \"sort_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/certificates",
+            "description": "name is required. issuer, issued_at, expires_at, credential_id, credential_url, description, and sort_order are optional. expires_at must be on or after issued_at when both are sent."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Example Certificate\",\n  \"issuer\": \"Example Issuer\",\n  \"issued_at\": \"2021-06-01\",\n  \"expires_at\": \"2024-06-01\",\n  \"credential_id\": \"EX-001\",\n  \"credential_url\": \"https://example.com/certificates/ex-001\",\n  \"description\": null,\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{base_url}}/api/certificates"
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Example Certificate\",\n    \"issuer\": \"Example Issuer\",\n    \"issued_at\": \"2021-06-01\",\n    \"expires_at\": \"2024-06-01\",\n    \"credential_id\": \"EX-001\",\n    \"credential_url\": \"https://example.com/certificates/ex-001\",\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            },
+            {
+              "name": "422 Unprocessable",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"issued_at\": \"2022-01-01\",\n  \"expires_at\": \"2021-01-01\"\n}"
+                },
+                "url": "{{base_url}}/api/certificates"
+              },
+              "status": "Unprocessable Content",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"The name field is required. (and 1 more error)\",\n  \"errors\": {\n    \"name\": [\n      \"The name field is required.\"\n    ],\n    \"expires_at\": [\n      \"The expires at field must be a date after or equal to issued at.\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Show certificate",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/certificates/{{certificate_id}}",
+            "description": "Returns one certificate. A missing id responds with the API not-found envelope."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/certificates/{{certificate_id}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Example Certificate\",\n    \"issuer\": \"Example Issuer\",\n    \"issued_at\": \"2021-06-01\",\n    \"expires_at\": \"2024-06-01\",\n    \"credential_id\": \"EX-001\",\n    \"credential_url\": \"https://example.com/certificates/ex-001\",\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/certificates/999999"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"message\": \"Resource not found.\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update certificate",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example Certificate\",\n  \"issuer\": \"Example Issuer\",\n  \"credential_id\": \"EX-001\",\n  \"sort_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/certificates/{{certificate_id}}",
+            "description": "Send only the fields you want to change. Changing sort_order shifts the other rows and packs the list back to 1..n."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{base_url}}/api/certificates/{{certificate_id}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Example Certificate\",\n    \"issuer\": \"Example Issuer\",\n    \"issued_at\": \"2021-06-01\",\n    \"expires_at\": \"2024-06-01\",\n    \"credential_id\": \"EX-001\",\n    \"credential_url\": \"https://example.com/certificates/ex-001\",\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete certificate",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/certificates/{{certificate_id}}",
+            "description": "Soft-deletes the row and closes the sort_order gap. The response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/certificates/{{certificate_id}}"
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.portfolio.test"
+    },
+    {
+      "key": "sanctum_token",
+      "value": ""
+    },
+    {
+      "key": "certificate_id",
+      "value": "1"
+    }
+  ]
+}

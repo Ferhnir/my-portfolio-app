@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EducationHistoryController;
 use App\Http\Controllers\TechnologyController;
 use App\Http\Controllers\TechStackCategoryController;
@@ -71,4 +73,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     /* ========================================= */
     Route::apiResource('education-histories', EducationHistoryController::class)
         ->parameters(['education-histories' => 'educationHistory']);
+
+    /* ========================================= */
+    /* COURSES */
+    /* ========================================= */
+    Route::apiResource('courses', CourseController::class)
+        ->parameters(['courses' => 'course']);
+
+    /* ========================================= */
+    /* CERTIFICATES */
+    /* ========================================= */
+    Route::apiResource('certificates', CertificateController::class)
+        ->parameters(['certificates' => 'certificate']);
 });

@@ -1,0 +1,332 @@
+{
+  "info": {
+    "name": "Courses",
+    "description": "Folder for the course routes. Import this file, then drag the Courses folder into your existing collection. Requests send Authorization: Bearer {{sanctum_token}} and call {{base_url}}/api. Create saves the new id into {{course_id}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Courses",
+      "description": "Authenticated CRUD for courses. sort_order is 1-based. Omit it, or send 0, to append. Delete is a soft delete and closes the gap.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{sanctum_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List courses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/courses",
+            "description": "Returns every course ordered by sort_order."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/courses"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Example Course\",\n      \"provider\": \"Example Provider\",\n      \"start_date\": \"2021-01-15\",\n      \"end_date\": \"2021-03-15\",\n      \"description\": null,\n      \"url\": \"https://example.com/courses/example\",\n      \"sort_order\": 1\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "    pm.collectionVariables.set('course_id', String(body.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example Course\",\n  \"provider\": \"Example Provider\",\n  \"start_date\": \"2021-01-15\",\n  \"end_date\": \"2021-03-15\",\n  \"description\": null,\n  \"url\": \"https://example.com/courses/example\",\n  \"sort_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/courses",
+            "description": "name is required. provider, start_date, end_date, description, url, and sort_order are optional. end_date must be on or after start_date when both are sent."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Example Course\",\n  \"provider\": \"Example Provider\",\n  \"start_date\": \"2021-01-15\",\n  \"end_date\": \"2021-03-15\",\n  \"description\": null,\n  \"url\": \"https://example.com/courses/example\",\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{base_url}}/api/courses"
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Example Course\",\n    \"provider\": \"Example Provider\",\n    \"start_date\": \"2021-01-15\",\n    \"end_date\": \"2021-03-15\",\n    \"description\": null,\n    \"url\": \"https://example.com/courses/example\",\n    \"sort_order\": 1\n  }\n}"
+            },
+            {
+              "name": "422 Unprocessable",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"start_date\": \"2022-01-01\",\n  \"end_date\": \"2021-01-01\"\n}"
+                },
+                "url": "{{base_url}}/api/courses"
+              },
+              "status": "Unprocessable Content",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"The name field is required. (and 1 more error)\",\n  \"errors\": {\n    \"name\": [\n      \"The name field is required.\"\n    ],\n    \"end_date\": [\n      \"The end date field must be a date after or equal to start date.\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Show course",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/courses/{{course_id}}",
+            "description": "Returns one course. A missing id responds with the API not-found envelope."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/courses/{{course_id}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Example Course\",\n    \"provider\": \"Example Provider\",\n    \"start_date\": \"2021-01-15\",\n    \"end_date\": \"2021-03-15\",\n    \"description\": null,\n    \"url\": \"https://example.com/courses/example\",\n    \"sort_order\": 1\n  }\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/courses/999999"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"message\": \"Resource not found.\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update course",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example Course\",\n  \"provider\": \"Example Provider\",\n  \"url\": \"https://example.com/courses/example\",\n  \"sort_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/courses/{{course_id}}",
+            "description": "Send only the fields you want to change. Changing sort_order shifts the other rows and packs the list back to 1..n."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{base_url}}/api/courses/{{course_id}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Example Course\",\n    \"provider\": \"Example Provider\",\n    \"start_date\": \"2021-01-15\",\n    \"end_date\": \"2021-03-15\",\n    \"description\": null,\n    \"url\": \"https://example.com/courses/example\",\n    \"sort_order\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete course",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/courses/{{course_id}}",
+            "description": "Soft-deletes the row and closes the sort_order gap. The response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/courses/{{course_id}}"
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.portfolio.test"
+    },
+    {
+      "key": "sanctum_token",
+      "value": ""
+    },
+    {
+      "key": "course_id",
+      "value": "1"
+    }
+  ]
+}
