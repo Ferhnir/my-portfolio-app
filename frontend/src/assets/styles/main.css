@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+    --color-linear-base: #080d11;
+    --color-linear-surface: #091117;
+    --color-linear-field: #09141c;
+    --color-linear-border: #193344;
+    --color-linear-border-hover: #31536a;
+    --color-linear-text: #e3e8ed;
+    --color-linear-secondary: #6e94ad;
+    --color-linear-muted: #426175;
+    --color-linear-blue: #78b9df;
+    --color-linear-green: #8cff00;
+    --color-linear-green-dark: #73bd0a;
+    --color-linear-red: #ff334c;
+    --font-cyber-display: "JetBrains Mono", ui-monospace, monospace;
+}
+
+body {
+    color: var(--color-linear-text);
+    background:
+        radial-gradient(
+            ellipse at center,
+            rgba(13, 36, 49, 0.35) 0%,
+            transparent 70%
+        ),
+        var(--color-linear-base);
+    font-family: var(--font-cyber-display);
+    -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    content: "";
+    pointer-events: none;
+    opacity: 0.25;
+    background-image:
+        linear-gradient(rgba(40, 91, 116, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(40, 91, 116, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+#app {
+    position: relative;
+    z-index: 1;
+}
+
+a, button, [role="button"], router-link {
+    -webkit-tap-highlight-color: transparent;
+}
+
+a:focus, button:focus, [role="button"]:focus, .router-link-active:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}

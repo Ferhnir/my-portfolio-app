@@ -1,0 +1,40 @@
+name: portfolio-stack
+
+services:
+  frontend:
+    container_name: portfolio-frontend
+    build:
+      context: ./frontend/Docker
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - WATCHPACK_POLLING=true # Ensures instant hot-reload inside WSL environments
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
+    networks:
+      - dev-network
+
+  # 2. BACKEND: Laravel API Engine
+  backend:
+    container_name: portfolio-backend
+    build:
+      context: ./backend/Docker
+      dockerfile: Dockerfile
+      args:
+        WWWUSER: '${WWWUSER}'
+        WWWGROUP: '${WWWGROUP}'
+    working_dir: /var/www/html
+    volumes:
+      - ./backend:/var/www/html
+    ports:
+      - "8000:8000"
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    name: dev-stack_dev-network # Tells Docker the exact real name of your cache network
+    external: true
