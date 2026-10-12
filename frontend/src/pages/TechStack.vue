@@ -27,82 +27,17 @@
         </p>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div
+          <TechStackGroupCard
               v-for="group in techGroups"
               :key="group.id"
-              class="border border-linear-border bg-linear-surface rounded-md p-6 space-y-4 hover:border-linear-border-hover transition-colors duration-200 shadow-[0_20px_70px_rgba(0,0,0,0.28)] flex flex-col"
-          >
-            <h2 class="text-xs font-bold uppercase tracking-widest font-cyber-display flex items-center space-x-2">
-              <span class="text-linear-green">{{ String(group.sort_order).padStart(2, '0') }} //</span>
-              <span class="text-linear-text">{{ group.name }}</span>
-            </h2>
-
-            <VueDraggable
-                v-model="group.categories"
-                :animation="150"
-                :disabled="!isAuthenticated"
-                group="tech-stack-categories"
-                handle=".category-handle"
-                data-list="group"
-                :data-group-id="group.id"
-                class="min-h-10 flex-1 space-y-4 pt-2"
-                @end="onCategoryDrop"
-                @move="onDragHover"
-            >
-              <div v-for="link in group.categories" :key="link.id" class="space-y-2">
-                <h3
-                    class="text-[13px] font-bold text-linear-red uppercase tracking-wider font-cyber-display"
-                    :class="isAuthenticated ? 'category-handle cursor-grab active:cursor-grabbing' : 'cursor-default'"
-                >
-                  {{ link.category.name }}
-                </h3>
-
-                <VueDraggable
-                    v-if="isAuthenticated"
-                    v-model="link.technologies"
-                    :animation="150"
-                    :sort="false"
-                    :group="{ name: 'tech-stack-technologies', pull: true, put: ['tech-stack-technologies'] }"
-                    draggable=".technology-handle"
-                    handle=".technology-handle"
-                    data-list="technologies"
-                    :data-link-id="link.id"
-                    class="flex flex-wrap items-start gap-2 min-h-8"
-                    @end="onTechnologyDrop"
-                    @move="onDragHover"
-                >
-                  <span
-                      v-for="placement in link.technologies"
-                      :key="placement.id"
-                      class="technology-handle cursor-grab px-2.5 py-1 text-[12px] font-medium uppercase tracking-wide font-cyber-display bg-linear-field border border-linear-border text-linear-blue rounded-md hover:text-linear-text hover:border-linear-border-hover transition-colors duration-150 active:cursor-grabbing"
-                  >
-                    {{ placement.technology.name }}
-                  </span>
-                </VueDraggable>
-
-                <div v-else class="flex flex-wrap gap-2">
-                  <span
-                      v-for="placement in link.technologies"
-                      :key="placement.id"
-                      class="px-2.5 py-1 text-[12px] font-medium uppercase tracking-wide font-cyber-display bg-linear-field border border-linear-border text-linear-blue rounded-md"
-                  >
-                    {{ placement.technology.name }}
-                  </span>
-                </div>
-              </div>
-            </VueDraggable>
-
-            <button
-                v-if="isAuthenticated && (group.categories?.length ?? 0) === 0"
-                type="button"
-                class="mt-auto w-full cursor-pointer flex items-center justify-center gap-2 border border-linear-red text-linear-red text-[11px] font-bold uppercase tracking-widest font-cyber-display px-3 py-2.5 transition duration-150 hover:bg-black/25 disabled:opacity-60 disabled:pointer-events-none"
-                :disabled="deletingGroupId === group.id"
-                @click="deleteGroup(group)"
-            >
-              <FontAwesomeIcon :icon="['fas', 'trash-can']" class="text-sm" />
-              Delete
-            </button>
-          </div>
+              :group="group"
+              :authenticated="isAuthenticated"
+              :deleting="deletingGroupId === group.id"
+              @delete="deleteGroup(group)"
+              @category-drop="onCategoryDrop"
+              @technology-drop="onTechnologyDrop"
+              @drag-move="onDragHover"
+          />
 
           <form
               v-if="isAuthenticated"
@@ -111,23 +46,16 @@
           >
             <label class="w-full space-y-2" for="new-group-name">
               <span class="text-[11px] font-bold uppercase tracking-widest text-linear-red font-cyber-display">Name</span>
-              <input
+              <BaseInput
                   id="new-group-name"
                   v-model="newGroupName"
-                  class="w-full bg-linear-field border border-linear-border text-linear-text text-xs uppercase tracking-wide font-cyber-display px-3 py-2 rounded-md outline-none focus:border-linear-border-hover"
-                  type="text"
-                  name="name"
                   placeholder="Group name"
                   required
-              >
+              />
             </label>
-            <button
-                type="submit"
-                class="w-full cursor-pointer bg-linear-green text-linear-base text-[11px] font-bold uppercase tracking-widest font-cyber-display px-3 py-2.5 transition duration-150 hover:brightness-90 disabled:opacity-60 disabled:pointer-events-none"
-                :disabled="creatingGroup"
-            >
+            <BaseButton type="submit" :disabled="creatingGroup">
               Add new group
-            </button>
+            </BaseButton>
           </form>
         </div>
       </div>
@@ -145,7 +73,7 @@
           empty-label="No unassigned categories."
           drag-group="tech-stack-categories"
           handle-class="category-handle"
-          pill-class="text-linear-red"
+          tone="red"
           source-list="unassigned"
           unassign-list="unassign"
           delete-list="delete"
@@ -171,7 +99,7 @@
           empty-label="No unassigned technologies."
           drag-group="tech-stack-technologies"
           handle-class="technology-handle"
-          pill-class="text-linear-blue"
+          tone="blue"
           source-list="unassigned-technologies"
           unassign-list="technology-unassign"
           delete-list="technology-delete"
@@ -193,7 +121,9 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { VueDraggable } from 'vue-draggable-plus'
+import BaseButton from '@/components/BaseButton.vue'
+import BaseInput from '@/components/BaseInput.vue'
+import TechStackGroupCard from '@/components/TechStackGroupCard.vue'
 import UnassignedStackPanel from '@/components/UnassignedStackPanel.vue'
 import { useCategoryStack } from '@/composables/useCategoryStack'
 import { useTechnologyStack } from '@/composables/useTechnologyStack'

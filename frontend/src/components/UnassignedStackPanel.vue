@@ -29,14 +29,15 @@
         @end="emit('end', $event)"
         @move="emit('move', $event)"
     >
-      <span
+      <BaseBadge
           v-for="item in items"
           :key="item.id"
-          :class="[handleClass, pillClass]"
-          class="cursor-grab px-2.5 py-1 text-[12px] font-medium uppercase tracking-wide font-cyber-display bg-linear-field border border-linear-border rounded-md active:cursor-grabbing"
+          kind="source"
+          :tone="tone"
+          :handle-class="handleClass"
       >
         {{ label(item) }}
-      </span>
+      </BaseBadge>
     </VueDraggable>
 
     <p
@@ -50,23 +51,16 @@
 
     <form class="flex flex-col gap-4" @submit.prevent="submit">
       <label class="w-full" :for="inputId">
-        <input
+        <BaseInput
             :id="inputId"
             v-model="name"
-            class="w-full bg-linear-field border border-linear-border text-linear-text text-xs uppercase tracking-wide font-cyber-display px-3 py-2 rounded-md outline-none focus:border-linear-border-hover"
-            type="text"
-            name="name"
             :placeholder="placeholder"
             required
-        >
+        />
       </label>
-      <button
-          type="submit"
-          class="w-full cursor-pointer bg-linear-green text-linear-base text-[11px] font-bold uppercase tracking-widest font-cyber-display px-3 py-2.5 transition duration-150 hover:brightness-90 disabled:opacity-60 disabled:pointer-events-none"
-          :disabled="creating"
-      >
+      <BaseButton type="submit" :disabled="creating">
         {{ submitLabel }}
-      </button>
+      </BaseButton>
     </form>
 
     <hr class="border-0 h-px bg-linear-border">
@@ -120,6 +114,9 @@
 <script setup lang="ts" generic="T extends { id: string | number }">
 import { ref } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
+import BaseBadge from '@/components/BaseBadge.vue'
+import BaseButton from '@/components/BaseButton.vue'
+import BaseInput from '@/components/BaseInput.vue'
 import { api } from '@/api/client'
 import type { ApiResponse } from '@/api/client'
 import type { NamedRecord, StackDragEvent } from '@/types/techStack'
@@ -133,7 +130,7 @@ const props = withDefaults(defineProps<{
     emptyLabel: string
     dragGroup: string
     handleClass: string
-    pillClass: string
+    tone?: 'red' | 'blue'
     sourceList: string
     unassignList: string
     deleteList: string
@@ -142,6 +139,7 @@ const props = withDefaults(defineProps<{
     unassignClass?: string
     deleteClass?: string
 }>(), {
+    tone: 'blue',
     loading: false,
     unassignClass: '',
     deleteClass: '',
