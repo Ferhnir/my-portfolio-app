@@ -1,11 +1,12 @@
 <?php
 
+use App\Http\Controllers\EducationHistoryController;
+use App\Http\Controllers\TechnologyController;
 use App\Http\Controllers\TechStackCategoryController;
 use App\Http\Controllers\TechStackController;
 use App\Http\Controllers\TechStackGroupCategoryController;
 use App\Http\Controllers\TechStackGroupController;
 use App\Http\Controllers\TechStackPlacementController;
-use App\Http\Controllers\TechnologyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -46,13 +47,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     });
 
-
-//    Route::apiResource('tech-stack-groups.tech-stack-categories', TechStackGroupCategoryController::class)
-//        ->only(['store', 'update', 'destroy'])
-//        ->parameters([
-//            'tech-stack-groups' => 'techStackGroup',
-//            'tech-stack-categories' => 'techStackCategory',
-//        ]);
+    //    Route::apiResource('tech-stack-groups.tech-stack-categories', TechStackGroupCategoryController::class)
+    //        ->only(['store', 'update', 'destroy'])
+    //        ->parameters([
+    //            'tech-stack-groups' => 'techStackGroup',
+    //            'tech-stack-categories' => 'techStackCategory',
+    //        ]);
 
     /* ========================================= */
     /* TECH STACK - TECHNOLOGIES */
@@ -65,4 +65,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('tech-stack-placements', TechStackPlacementController::class)
         ->only(['store', 'update', 'destroy'])
         ->parameters(['tech-stack-placements' => 'techStackPlacement']);
+
+    /* ========================================= */
+    /* EDUCATION HISTORY */
+    /* ========================================= */
+    Route::apiResource('education-histories', EducationHistoryController::class)
+        ->parameters(['education-histories' => 'educationHistory']);
 });

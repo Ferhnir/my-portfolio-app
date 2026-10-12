@@ -32,6 +32,13 @@ class TechStackGroupCategory extends Model implements SortableModel, ModelLinkIn
         self::SORTABLE_COLUMN,
     ];
 
+    protected function casts(): array
+    {
+        return [
+            self::SORTABLE_COLUMN => 'integer',
+        ];
+    }
+
     public function techStackGroup(): BelongsTo
     {
         return $this->belongsTo(related: TechStackGroup::class, foreignKey: self::LINKABLE_MODEL_PARENT_KEY);

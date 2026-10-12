@@ -1,0 +1,332 @@
+{
+  "info": {
+    "name": "Education History",
+    "description": "Folder for the education history routes. Import this file, then drag the Education History folder into your existing collection. Requests send Authorization: Bearer {{sanctum_token}} and call {{base_url}}/api. Create saves the new id into {{education_history_id}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Education History",
+      "description": "Authenticated CRUD for education histories. sort_order is 1-based. Omit it, or send 0, to append. Delete is a soft delete and closes the gap.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{sanctum_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List education histories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/education-histories",
+            "description": "Returns every education history ordered by sort_order."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/education-histories"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"school_name\": \"Example University\",\n      \"degree\": \"Bachelor\",\n      \"field_of_study\": \"Computer Science\",\n      \"start_date\": \"2016-10-01\",\n      \"end_date\": \"2020-06-30\",\n      \"is_current\": false,\n      \"description\": null,\n      \"sort_order\": 1\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create education history",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "    pm.collectionVariables.set('education_history_id', String(body.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"school_name\": \"Example University\",\n  \"degree\": \"Bachelor\",\n  \"field_of_study\": \"Computer Science\",\n  \"start_date\": \"2016-10-01\",\n  \"end_date\": \"2020-06-30\",\n  \"is_current\": false,\n  \"description\": null,\n  \"sort_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/education-histories",
+            "description": "school_name is required. degree, field_of_study, start_date, end_date, is_current, description, and sort_order are optional. end_date must be on or after start_date when both are sent."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"school_name\": \"Example University\",\n  \"degree\": \"Bachelor\",\n  \"field_of_study\": \"Computer Science\",\n  \"start_date\": \"2016-10-01\",\n  \"end_date\": \"2020-06-30\",\n  \"is_current\": false,\n  \"description\": null,\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{base_url}}/api/education-histories"
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"school_name\": \"Example University\",\n    \"degree\": \"Bachelor\",\n    \"field_of_study\": \"Computer Science\",\n    \"start_date\": \"2016-10-01\",\n    \"end_date\": \"2020-06-30\",\n    \"is_current\": false,\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            },
+            {
+              "name": "422 Unprocessable",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"start_date\": \"2022-01-01\",\n  \"end_date\": \"2021-01-01\"\n}"
+                },
+                "url": "{{base_url}}/api/education-histories"
+              },
+              "status": "Unprocessable Content",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"The school name field is required. (and 1 more error)\",\n  \"errors\": {\n    \"school_name\": [\n      \"The school name field is required.\"\n    ],\n    \"end_date\": [\n      \"The end date field must be a date after or equal to start date.\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Show education history",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/education-histories/{{education_history_id}}",
+            "description": "Returns one education history. A missing id responds with the API not-found envelope."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/education-histories/{{education_history_id}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"school_name\": \"Example University\",\n    \"degree\": \"Bachelor\",\n    \"field_of_study\": \"Computer Science\",\n    \"start_date\": \"2016-10-01\",\n    \"end_date\": \"2020-06-30\",\n    \"is_current\": false,\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/education-histories/999999"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"message\": \"Resource not found.\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update education history",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"school_name\": \"Example University\",\n  \"degree\": \"Bachelor\",\n  \"field_of_study\": \"Computer Science\",\n  \"is_current\": true,\n  \"end_date\": null,\n  \"sort_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/education-histories/{{education_history_id}}",
+            "description": "Send only the fields you want to change. Changing sort_order shifts the other rows and packs the list back to 1..n."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{base_url}}/api/education-histories/{{education_history_id}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"school_name\": \"Example University\",\n    \"degree\": \"Bachelor\",\n    \"field_of_study\": \"Computer Science\",\n    \"start_date\": \"2016-10-01\",\n    \"end_date\": null,\n    \"is_current\": true,\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete education history",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/education-histories/{{education_history_id}}",
+            "description": "Soft-deletes the row and closes the sort_order gap. The response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/education-histories/{{education_history_id}}"
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.portfolio.test"
+    },
+    {
+      "key": "sanctum_token",
+      "value": ""
+    },
+    {
+      "key": "education_history_id",
+      "value": "1"
+    }
+  ]
+}
