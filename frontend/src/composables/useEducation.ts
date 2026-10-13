@@ -37,6 +37,10 @@ export function useEducation() {
         certificates: false,
     })
 
+    function sortItems<T extends { sort_order: number }>(items: T[]) {
+        return [...items].sort((left, right) => left.sort_order - right.sort_order)
+    }
+
     async function createRecord<T extends { sort_order: number }>(
         path: string,
         body: EducationCreateBody,
@@ -47,7 +51,40 @@ export function useEducation() {
 
         try {
             const response = await api<ApiResponse<T>>(path, { method: 'POST', body, toast: false })
-            list.value.items = [...list.value.items, response.data].sort((left, right) => left.sort_order - right.sort_order)
+            list.value.items = sortItems([...list.value.items, response.data])
+        } finally {
+            creating.value[key] = false
+        }
+    }
+
+    async function updateRecord<T extends { id: number, sort_order: number }>(
+        path: string,
+        id: number,
+        body: EducationCreateBody,
+        list: Ref<EducationList<T>>,
+        key: EducationCreateKey,
+    ) {
+        creating.value[key] = true
+
+        try {
+            const response = await api<ApiResponse<T>>(`${path}/${id}`, { method: 'PATCH', body, toast: false })
+            list.value.items = sortItems(list.value.items.map((item) => item.id === id ? response.data : item))
+        } finally {
+            creating.value[key] = false
+        }
+    }
+
+    async function removeRecord<T extends { id: number }>(
+        path: string,
+        id: number,
+        list: Ref<EducationList<T>>,
+        key: EducationCreateKey,
+    ) {
+        creating.value[key] = true
+
+        try {
+            await api(`${path}/${id}`, { method: 'DELETE', toast: false })
+            list.value.items = list.value.items.filter((item) => item.id !== id)
         } finally {
             creating.value[key] = false
         }
@@ -57,12 +94,36 @@ export function useEducation() {
         return createRecord('/education-histories', body, histories, 'history')
     }
 
+    function updateHistory(id: number, body: EducationCreateBody) {
+        return updateRecord('/education-histories', id, body, histories, 'history')
+    }
+
+    function removeHistory(id: number) {
+        return removeRecord('/education-histories', id, histories, 'history')
+    }
+
     function createCourse(body: EducationCreateBody) {
         return createRecord('/courses', body, courses, 'courses')
     }
 
+    function updateCourse(id: number, body: EducationCreateBody) {
+        return updateRecord('/courses', id, body, courses, 'courses')
+    }
+
+    function removeCourse(id: number) {
+        return removeRecord('/courses', id, courses, 'courses')
+    }
+
     function createCertificate(body: EducationCreateBody) {
         return createRecord('/certificates', body, certificates, 'certificates')
+    }
+
+    function updateCertificate(id: number, body: EducationCreateBody) {
+        return updateRecord('/certificates', id, body, certificates, 'certificates')
+    }
+
+    function removeCertificate(id: number) {
+        return removeRecord('/certificates', id, certificates, 'certificates')
     }
 
     async function load() {

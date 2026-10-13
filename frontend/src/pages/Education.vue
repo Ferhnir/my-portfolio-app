@@ -27,19 +27,13 @@
         :loading="histories.loading"
         :error="histories.error"
         :items="historyEntries"
+        :can-edit="isAuthenticated"
+        :busy="creating.history"
+        :editing-id="editingId('history')"
+        @edit="startEdit('history', $event)"
+        @remove="onRemove('history', $event)"
     >
-      <EducationCreatePanel
-          v-if="isAuthenticated"
-          :key="formKeys.history"
-          title="Add education"
-          submit-label="Add education"
-          id-prefix="history"
-          :fields="historyFields"
-          :pending="creating.history"
-          :errors="fieldErrors.history"
-          :message="formMessages.history"
-          @submit="onCreate('history', $event)"
-      />
+      <BaseButton v-if="isAuthenticated" type="button" @click="openCreate('history')">Add new record</BaseButton>
     </EducationSection>
 
     <EducationSection
@@ -51,19 +45,13 @@
         :loading="courses.loading"
         :error="courses.error"
         :items="courseEntries"
+        :can-edit="isAuthenticated"
+        :busy="creating.courses"
+        :editing-id="editingId('courses')"
+        @edit="startEdit('courses', $event)"
+        @remove="onRemove('courses', $event)"
     >
-      <EducationCreatePanel
-          v-if="isAuthenticated"
-          :key="formKeys.courses"
-          title="Add course"
-          submit-label="Add course"
-          id-prefix="course"
-          :fields="courseFields"
-          :pending="creating.courses"
-          :errors="fieldErrors.courses"
-          :message="formMessages.courses"
-          @submit="onCreate('courses', $event)"
-      />
+      <BaseButton v-if="isAuthenticated" type="button" @click="openCreate('courses')">Add new record</BaseButton>
     </EducationSection>
 
     <EducationSection
@@ -75,32 +63,64 @@
         :loading="certificates.loading"
         :error="certificates.error"
         :items="certificateEntries"
+        :can-edit="isAuthenticated"
+        :busy="creating.certificates"
+        :editing-id="editingId('certificates')"
+        @edit="startEdit('certificates', $event)"
+        @remove="onRemove('certificates', $event)"
     >
-      <EducationCreatePanel
-          v-if="isAuthenticated"
-          :key="formKeys.certificates"
-          title="Add certificate"
-          submit-label="Add certificate"
-          id-prefix="certificate"
-          :fields="certificateFields"
-          :pending="creating.certificates"
-          :errors="fieldErrors.certificates"
-          :message="formMessages.certificates"
-          @submit="onCreate('certificates', $event)"
-      />
+      <BaseButton v-if="isAuthenticated" type="button" @click="openCreate('certificates')">Add new record</BaseButton>
     </EducationSection>
+
+    <div
+        v-if="formOpen && activeForm"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 py-8"
+        @click.self="closeForm"
+    >
+      <div class="max-h-full w-full max-w-3xl overflow-y-auto">
+        <EducationCreatePanel
+            :key="formKey"
+            :title="editing ? activeForm.titleEdit : activeForm.titleAdd"
+            :submit-label="editing ? 'Save' : activeForm.submitAdd"
+            :id-prefix="activeForm.idPrefix"
+            form-id="education-form"
+            :fields="activeForm.fields"
+            :values="formValues"
+            :include-empty="editing !== null"
+            :cancellable="true"
+            :pending="formPending"
+            :errors="fieldErrors"
+            :message="formMessage"
+            @submit="onSubmit"
+            @cancel="closeForm"
+        />
+      </div>
+    </div>
+
+    <ConfirmDialog
+        :open="pendingDelete !== null"
+        :title="deleteTitle"
+        :message="pendingDelete ? `Delete ${pendingDelete.label}?` : ''"
+        confirm-label="Delete"
+        :pending="deletePending"
+        :error="deleteError"
+        @confirm="confirmDelete"
+        @cancel="cancelDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ApiError } from '@/api/client'
 import { isAuthenticated } from '@/auth'
+import BaseButton from '@/components/BaseButton.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import EducationCreatePanel from '@/components/EducationCreatePanel.vue'
 import EducationSection from '@/components/EducationSection.vue'
 import { useEducation } from '@/composables/useEducation'
 import { certificateFields, courseFields, historyFields, toCertificateEntry, toCourseEntry, toHistoryEntry } from '@/types/education'
-import type { EducationCreateBody, EducationTab } from '@/types/education'
+import type { Certificate, Course, EducationCreateBody, EducationFormField, EducationHistory, EducationTab } from '@/types/education'
 
 const tabs: { id: EducationTab, label: string }[] = [
     { id: 'history', label: 'Education' },
@@ -108,15 +128,66 @@ const tabs: { id: EducationTab, label: string }[] = [
     { id: 'certificates', label: 'Certificates' },
 ]
 
+const forms: Record<EducationTab, {
+    titleAdd: string
+    titleEdit: string
+    submitAdd: string
+    idPrefix: string
+    fields: EducationFormField[]
+    deleteTitle: string
+}> = {
+    history: {
+        titleAdd: 'Add education',
+        titleEdit: 'Edit education',
+        submitAdd: 'Add education',
+        idPrefix: 'history',
+        fields: historyFields,
+        deleteTitle: 'Delete education',
+    },
+    courses: {
+        titleAdd: 'Add course',
+        titleEdit: 'Edit course',
+        submitAdd: 'Add course',
+        idPrefix: 'course',
+        fields: courseFields,
+        deleteTitle: 'Delete course',
+    },
+    certificates: {
+        titleAdd: 'Add certificate',
+        titleEdit: 'Edit certificate',
+        submitAdd: 'Add certificate',
+        idPrefix: 'certificate',
+        fields: certificateFields,
+        deleteTitle: 'Delete certificate',
+    },
+}
+
+type EducationRow = EducationHistory | Course | Certificate
+
 const active = ref<EducationTab>('history')
-const formKeys = ref<Record<EducationTab, number>>({ history: 0, courses: 0, certificates: 0 })
-const fieldErrors = ref<Record<EducationTab, Record<string, string[]>>>({
-    history: {},
-    courses: {},
-    certificates: {},
-})
-const formMessages = ref<Record<EducationTab, string>>({ history: '', courses: '', certificates: '' })
-const { histories, courses, certificates, creating, createHistory, createCourse, createCertificate } = useEducation()
+const formKey = ref(0)
+const formOpen = ref(false)
+const formSection = ref<EducationTab | null>(null)
+const fieldErrors = ref<Record<string, string[]>>({})
+const formMessage = ref('')
+const editing = ref<EducationRow | null>(null)
+const pendingDelete = ref<{ section: EducationTab, id: number, label: string } | null>(null)
+const deleteError = ref('')
+const {
+    histories,
+    courses,
+    certificates,
+    creating,
+    createHistory,
+    updateHistory,
+    removeHistory,
+    createCourse,
+    updateCourse,
+    removeCourse,
+    createCertificate,
+    updateCertificate,
+    removeCertificate,
+} = useEducation()
 
 const creators = {
     history: createHistory,
@@ -124,16 +195,213 @@ const creators = {
     certificates: createCertificate,
 }
 
-async function onCreate(key: EducationTab, body: EducationCreateBody) {
-    fieldErrors.value[key] = {}
-    formMessages.value[key] = ''
+const updaters = {
+    history: updateHistory,
+    courses: updateCourse,
+    certificates: updateCertificate,
+}
+
+const removers = {
+    history: removeHistory,
+    courses: removeCourse,
+    certificates: removeCertificate,
+}
+
+const activeForm = computed(() => formSection.value ? forms[formSection.value] : null)
+const formPending = computed(() => formSection.value ? creating.value[formSection.value] : false)
+const deletePending = computed(() => pendingDelete.value ? creating.value[pendingDelete.value.section] : false)
+const deleteTitle = computed(() => pendingDelete.value ? forms[pendingDelete.value.section].deleteTitle : '')
+
+const formValues = computed((): Record<string, string | boolean | null> => {
+    const section = formSection.value
+    const row = editing.value
+
+    if (!section || !row) {
+        return {}
+    }
+
+    if (section === 'history') {
+        const history = row as EducationHistory
+
+        return {
+            school_name: history.school_name,
+            degree: history.degree ?? '',
+            field_of_study: history.field_of_study ?? '',
+            start_date: history.start_date ?? '',
+            end_date: history.end_date ?? '',
+            is_current: history.is_current,
+            description: history.description ?? '',
+        }
+    }
+
+    if (section === 'courses') {
+        const course = row as Course
+
+        return {
+            name: course.name,
+            provider: course.provider ?? '',
+            url: course.url ?? '',
+            start_date: course.start_date ?? '',
+            end_date: course.end_date ?? '',
+            description: course.description ?? '',
+        }
+    }
+
+    const certificate = row as Certificate
+
+    return {
+        name: certificate.name,
+        issuer: certificate.issuer ?? '',
+        credential_id: certificate.credential_id ?? '',
+        credential_url: certificate.credential_url ?? '',
+        issued_at: certificate.issued_at ?? '',
+        expires_at: certificate.expires_at ?? '',
+        description: certificate.description ?? '',
+    }
+})
+
+function listFor(section: EducationTab) {
+    if (section === 'history') {
+        return histories.value.items
+    }
+
+    if (section === 'courses') {
+        return courses.value.items
+    }
+
+    return certificates.value.items
+}
+
+function recordLabel(section: EducationTab, row: EducationRow) {
+    if (section === 'history') {
+        return (row as EducationHistory).school_name
+    }
+
+    return (row as Course | Certificate).name
+}
+
+function editingId(section: EducationTab) {
+    return formSection.value === section ? editing.value?.id ?? null : null
+}
+
+function resetForm() {
+    editing.value = null
+    formSection.value = null
+    fieldErrors.value = {}
+    formMessage.value = ''
+    formOpen.value = false
+    formKey.value += 1
+}
+
+function openCreate(section: EducationTab) {
+    editing.value = null
+    formSection.value = section
+    fieldErrors.value = {}
+    formMessage.value = ''
+    formKey.value += 1
+    formOpen.value = true
+}
+
+function startEdit(section: EducationTab, id: number) {
+    const row = listFor(section).find((item) => item.id === id)
+
+    if (!row) {
+        return
+    }
+
+    editing.value = row
+    formSection.value = section
+    fieldErrors.value = {}
+    formMessage.value = ''
+    formKey.value += 1
+    formOpen.value = true
+}
+
+function closeForm() {
+    if (formPending.value || pendingDelete.value) {
+        return
+    }
+
+    resetForm()
+}
+
+function onFormKey(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+        closeForm()
+    }
+}
+
+watch(formOpen, (open) => {
+    if (open) {
+        window.addEventListener('keydown', onFormKey)
+    } else {
+        window.removeEventListener('keydown', onFormKey)
+    }
+})
+
+function onRemove(section: EducationTab, id: number) {
+    const row = listFor(section).find((item) => item.id === id)
+
+    if (!row) {
+        return
+    }
+
+    pendingDelete.value = { section, id, label: recordLabel(section, row) }
+    deleteError.value = ''
+}
+
+function cancelDelete() {
+    if (deletePending.value) {
+        return
+    }
+
+    pendingDelete.value = null
+    deleteError.value = ''
+}
+
+async function confirmDelete() {
+    const pending = pendingDelete.value
+
+    if (!pending) {
+        return
+    }
+
+    deleteError.value = ''
 
     try {
-        await creators[key](body)
-        formKeys.value[key] += 1
+        await removers[pending.section](pending.id)
+
+        if (formSection.value === pending.section && editing.value?.id === pending.id) {
+            resetForm()
+        }
+
+        pendingDelete.value = null
     } catch (error) {
-        fieldErrors.value[key] = error instanceof ApiError ? error.errors : {}
-        formMessages.value[key] = error instanceof ApiError ? error.message : 'Could not add this record.'
+        deleteError.value = error instanceof ApiError ? error.message : 'Could not delete this record.'
+    }
+}
+
+async function onSubmit(body: EducationCreateBody) {
+    const section = formSection.value
+
+    if (!section) {
+        return
+    }
+
+    fieldErrors.value = {}
+    formMessage.value = ''
+
+    try {
+        if (editing.value) {
+            await updaters[section](editing.value.id, body)
+        } else {
+            await creators[section](body)
+        }
+
+        resetForm()
+    } catch (error) {
+        fieldErrors.value = error instanceof ApiError ? error.errors : {}
+        formMessage.value = error instanceof ApiError ? error.message : 'Could not save this record.'
     }
 }
 
@@ -173,5 +441,8 @@ onMounted(() => {
     }
 })
 
-onUnmounted(() => observer?.disconnect())
+onUnmounted(() => {
+    observer?.disconnect()
+    window.removeEventListener('keydown', onFormKey)
+})
 </script>
