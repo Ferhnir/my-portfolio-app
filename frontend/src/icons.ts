@@ -10,6 +10,7 @@ import {
     faGraduationCap,
     faPowerOff,
     faTerminal,
+    faTools,
     faTrashCan,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -24,5 +25,6 @@ library.add(
     faGraduationCap,
     faPowerOff,
     faTerminal,
+    faTools,
     faTrashCan,
 )

@@ -45,7 +45,7 @@ export interface EducationEntryView {
 
 export type EducationTab = 'history' | 'courses' | 'certificates'
 
-export type EducationCreateBody = Record<string, string | boolean>
+export type EducationCreateBody = Record<string, string | boolean | null>
 
 export interface EducationFormField {
     key: string

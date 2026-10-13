@@ -35,22 +35,22 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/api-docs',
         name: 'api-docs',
-        component: () => import('@/pages/Employment.vue')
+        component: () => import('@/pages/Placeholder.vue')
     },
     {
         path: '/contact',
         name: 'contact',
-        component: () => import('@/pages/Employment.vue')
+        component: () => import('@/pages/Placeholder.vue')
     },
     {
         path: '/completed-tasks',
         name: 'completed-tasks',
-        component: () => import('@/pages/Employment.vue')
+        component: () => import('@/pages/Placeholder.vue')
     },
     {
         path: '/job-applications',
         name: 'job-applications',
-        component: () => import('@/pages/Employment.vue')
+        component: () => import('@/pages/Placeholder.vue')
     }
 ]
 
