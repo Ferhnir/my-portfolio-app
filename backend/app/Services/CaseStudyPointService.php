@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\CaseStudyBlock;
+use App\Models\CaseStudyPoint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+
+class CaseStudyPointService
+{
+    /**
+     * @param  array<string, mixed>  $attributes
+     *
+     * @throws Throwable
+     */
+    public function create(CaseStudyBlock $block, array $attributes): CaseStudyPoint
+    {
+        return DB::transaction(function () use ($block, $attributes): CaseStudyPoint {
+            if ($block->layout === CaseStudyBlock::LAYOUT_CARD && $block->points()->exists()) {
+                throw ValidationException::withMessages([
+                    'body' => 'A card already has its point.',
+                ]);
+            }
+
+            $point = $block->points()->create($attributes);
+
+            return $point->refresh();
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     *
+     * @throws Throwable
+     */
+    public function update(CaseStudyPoint $point, array $attributes): CaseStudyPoint
+    {
+        return DB::transaction(function () use ($point, $attributes): CaseStudyPoint {
+            $point->update($attributes);
+
+            return $point->refresh();
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function delete(CaseStudyPoint $point): void
+    {
+        DB::transaction(fn () => $point->delete());
+    }
+}

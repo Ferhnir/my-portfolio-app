@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\CaseStudyBlockController;
+use App\Http\Controllers\CaseStudyController;
+use App\Http\Controllers\CaseStudyPointController;
+use App\Http\Controllers\CaseStudySectionController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EducationHistoryController;
@@ -25,6 +29,17 @@ Route::get('employments', [EmploymentController::class, 'index'])->name('employm
 Route::get('education-histories', [EducationHistoryController::class, 'index'])->name('education-histories.index');
 Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('certificates', [CertificateController::class, 'index'])->name('certificates.index');
+
+Route::scopeBindings()->group(function () {
+    Route::get('case-studies', [CaseStudyController::class, 'index'])->name('case-studies.index');
+    Route::get('case-studies/{caseStudy}', [CaseStudyController::class, 'show'])->name('case-studies.show');
+    Route::get('case-studies/{caseStudy}/sections', [CaseStudySectionController::class, 'index'])->name('case-studies.sections.index');
+    Route::get('case-studies/{caseStudy}/sections/{section}', [CaseStudySectionController::class, 'show'])->name('case-studies.sections.show');
+    Route::get('case-studies/{caseStudy}/sections/{section}/blocks', [CaseStudyBlockController::class, 'index'])->name('case-studies.sections.blocks.index');
+    Route::get('case-studies/{caseStudy}/sections/{section}/blocks/{block}', [CaseStudyBlockController::class, 'show'])->name('case-studies.sections.blocks.show');
+    Route::get('case-studies/{caseStudy}/sections/{section}/blocks/{block}/points', [CaseStudyPointController::class, 'index'])->name('case-studies.sections.blocks.points.index');
+    Route::get('case-studies/{caseStudy}/sections/{section}/blocks/{block}/points/{point}', [CaseStudyPointController::class, 'show'])->name('case-studies.sections.blocks.points.show');
+});
 
 Route::middleware(['auth:sanctum'])->group(function () {
     /* ========================================= */
@@ -101,4 +116,38 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('certificates', CertificateController::class)
         ->except(['index'])
         ->parameters(['certificates' => 'certificate']);
+
+    /* ========================================= */
+    /* CASE STUDIES */
+    /* ========================================= */
+    Route::apiResource('case-studies', CaseStudyController::class)
+        ->except(['index', 'show'])
+        ->parameters(['case-studies' => 'caseStudy']);
+
+    Route::apiResource('case-studies.sections', CaseStudySectionController::class)
+        ->except(['index', 'show'])
+        ->scoped()
+        ->parameters([
+            'case-studies' => 'caseStudy',
+            'sections' => 'section',
+        ]);
+
+    Route::apiResource('case-studies.sections.blocks', CaseStudyBlockController::class)
+        ->except(['index', 'show'])
+        ->scoped()
+        ->parameters([
+            'case-studies' => 'caseStudy',
+            'sections' => 'section',
+            'blocks' => 'block',
+        ]);
+
+    Route::apiResource('case-studies.sections.blocks.points', CaseStudyPointController::class)
+        ->except(['index', 'show'])
+        ->scoped()
+        ->parameters([
+            'case-studies' => 'caseStudy',
+            'sections' => 'section',
+            'blocks' => 'block',
+            'points' => 'point',
+        ]);
 });
