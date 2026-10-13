@@ -3,6 +3,7 @@
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EducationHistoryController;
+use App\Http\Controllers\EmploymentController;
 use App\Http\Controllers\TechnologyController;
 use App\Http\Controllers\TechStackCategoryController;
 use App\Http\Controllers\TechStackController;
@@ -20,6 +21,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::get('tech-stack', [TechStackController::class, 'index'])->name('tech-stack.index');
 
+Route::get('employments', [EmploymentController::class, 'index'])->name('employments.index');
 Route::get('education-histories', [EducationHistoryController::class, 'index'])->name('education-histories.index');
 Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('certificates', [CertificateController::class, 'index'])->name('certificates.index');
@@ -71,6 +73,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('tech-stack-placements', TechStackPlacementController::class)
         ->only(['store', 'update', 'destroy'])
         ->parameters(['tech-stack-placements' => 'techStackPlacement']);
+
+    /* ========================================= */
+    /* EMPLOYMENT */
+    /* ========================================= */
+    Route::apiResource('employments', EmploymentController::class)
+        ->except(['index'])
+        ->parameters(['employments' => 'employment']);
 
     /* ========================================= */
     /* EDUCATION HISTORY */

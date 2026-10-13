@@ -14,9 +14,14 @@
       <p v-else-if="error" class="text-xs uppercase tracking-wide text-linear-red" role="alert">{{ error }}</p>
       <p v-else-if="items.length === 0" class="text-xs uppercase tracking-wide text-linear-secondary">{{ empty }}</p>
 
-      <ol v-else class="relative ml-3 space-y-6 border-l border-linear-border">
+      <ol
+          v-else
+          :class="periodAside
+            ? 'grid grid-cols-1 gap-y-2 sm:grid-cols-[max-content_0.75rem_minmax(0,1fr)] sm:gap-x-4 sm:gap-y-0'
+            : 'relative ml-3 space-y-6 border-l border-linear-border'"
+      >
         <EducationEntry
-            v-for="item in items"
+            v-for="(item, index) in items"
             :key="item.id"
             :title="item.title"
             :subtitle="item.subtitle"
@@ -24,6 +29,14 @@
             :body="item.body"
             :href="item.href"
             :href-label="item.hrefLabel"
+            :period-aside="periodAside"
+            :connect-above="index > 0"
+            :connect-below="index < items.length - 1"
+            :can-edit="canEdit"
+            :busy="busy"
+            :selected="editingId === item.id"
+            @edit="emit('edit', item.id)"
+            @remove="emit('remove', item.id)"
         />
       </ol>
 
@@ -36,7 +49,7 @@
 import EducationEntry from '@/components/EducationEntry.vue'
 import type { EducationEntryView } from '@/types/education'
 
-defineProps<{
+withDefaults(defineProps<{
     id: string
     kicker: string
     title: string
@@ -45,5 +58,19 @@ defineProps<{
     error: string
     empty: string
     items: EducationEntryView[]
+    periodAside?: boolean
+    canEdit?: boolean
+    editingId?: number | null
+    busy?: boolean
+}>(), {
+    periodAside: false,
+    canEdit: false,
+    editingId: null,
+    busy: false,
+})
+
+const emit = defineEmits<{
+    edit: [id: number]
+    remove: [id: number]
 }>()
 </script>

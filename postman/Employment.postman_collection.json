@@ -1,0 +1,332 @@
+{
+  "info": {
+    "name": "Employment",
+    "description": "Folder for the employment routes. Import this file, then drag the Employment folder into your existing collection. Requests send Authorization: Bearer {{sanctum_token}} and call {{base_url}}/api. Create saves the new id into {{employment_id}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Employment",
+      "description": "Authenticated CRUD for employment. sort_order is 1-based. Omit it, or send 0, to append. Delete is a soft delete and closes the gap.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{sanctum_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List employments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/employments",
+            "description": "Returns every employment ordered by sort_order. Public."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/employments"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"company_name\": \"Example Company\",\n      \"job_title\": \"Software Engineer\",\n      \"location\": \"Remote\",\n      \"start_date\": \"2020-07-01\",\n      \"end_date\": \"2023-03-31\",\n      \"is_current\": false,\n      \"description\": null,\n      \"sort_order\": 1\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create employment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "    pm.collectionVariables.set('employment_id', String(body.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_name\": \"Example Company\",\n  \"job_title\": \"Software Engineer\",\n  \"location\": \"Remote\",\n  \"start_date\": \"2020-07-01\",\n  \"end_date\": \"2023-03-31\",\n  \"is_current\": false,\n  \"description\": null,\n  \"sort_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/employments",
+            "description": "company_name is required. job_title, location, start_date, end_date, is_current, description, and sort_order are optional. end_date must be on or after start_date when both are sent."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"company_name\": \"Example Company\",\n  \"job_title\": \"Software Engineer\",\n  \"location\": \"Remote\",\n  \"start_date\": \"2020-07-01\",\n  \"end_date\": \"2023-03-31\",\n  \"is_current\": false,\n  \"description\": null,\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{base_url}}/api/employments"
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"company_name\": \"Example Company\",\n    \"job_title\": \"Software Engineer\",\n    \"location\": \"Remote\",\n    \"start_date\": \"2020-07-01\",\n    \"end_date\": \"2023-03-31\",\n    \"is_current\": false,\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            },
+            {
+              "name": "422 Unprocessable",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"start_date\": \"2022-01-01\",\n  \"end_date\": \"2021-01-01\"\n}"
+                },
+                "url": "{{base_url}}/api/employments"
+              },
+              "status": "Unprocessable Content",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"The company name field is required. (and 1 more error)\",\n  \"errors\": {\n    \"company_name\": [\n      \"The company name field is required.\"\n    ],\n    \"end_date\": [\n      \"The end date field must be a date after or equal to start date.\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Show employment",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/employments/{{employment_id}}",
+            "description": "Returns one employment. A missing id responds with the API not-found envelope."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/employments/{{employment_id}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"company_name\": \"Example Company\",\n    \"job_title\": \"Software Engineer\",\n    \"location\": \"Remote\",\n    \"start_date\": \"2020-07-01\",\n    \"end_date\": \"2023-03-31\",\n    \"is_current\": false,\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/employments/999999"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"message\": \"Resource not found.\",\n  \"errors\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update employment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_name\": \"Example Company\",\n  \"job_title\": \"Software Engineer\",\n  \"location\": \"Remote\",\n  \"is_current\": true,\n  \"end_date\": null,\n  \"sort_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/employments/{{employment_id}}",
+            "description": "Send only the fields you want to change. Changing sort_order shifts the other rows and packs the list back to 1..n."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{base_url}}/api/employments/{{employment_id}}"
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"company_name\": \"Example Company\",\n    \"job_title\": \"Software Engineer\",\n    \"location\": \"Remote\",\n    \"start_date\": \"2020-07-01\",\n    \"end_date\": null,\n    \"is_current\": true,\n    \"description\": null,\n    \"sort_order\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete employment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/employments/{{employment_id}}",
+            "description": "Soft-deletes the row and closes the sort_order gap. The response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/employments/{{employment_id}}"
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.portfolio.test"
+    },
+    {
+      "key": "sanctum_token",
+      "value": ""
+    },
+    {
+      "key": "employment_id",
+      "value": "1"
+    }
+  ]
+}

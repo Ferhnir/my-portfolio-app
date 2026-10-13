@@ -1,5 +1,5 @@
 <template>
-  <form class="space-y-4 rounded-md border border-linear-border bg-linear-surface p-6" @submit.prevent="submit">
+  <form :id="formId" class="space-y-4 rounded-md border border-linear-border bg-linear-surface p-6" @submit.prevent="submit">
     <p class="text-[11px] font-bold uppercase tracking-widest text-linear-red">{{ title }}</p>
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -52,8 +52,18 @@
       {{ message }}
     </p>
 
-    <div class="max-w-xs">
-      <BaseButton type="submit" :disabled="pending">{{ submitLabel }}</BaseButton>
+    <div class="flex items-center gap-4">
+      <div class="w-full max-w-xs">
+        <BaseButton type="submit" :disabled="pending">{{ submitLabel }}</BaseButton>
+      </div>
+      <button
+          v-if="cancellable"
+          type="button"
+          class="text-[11px] font-bold uppercase tracking-widest text-linear-secondary hover:text-linear-text"
+          @click="emit('cancel')"
+      >
+        Cancel
+      </button>
     </div>
   </form>
 </template>
@@ -70,27 +80,38 @@ const props = withDefaults(defineProps<{
     submitLabel: string
     idPrefix: string
     fields: EducationFormField[]
+    values?: Record<string, string | boolean | null>
     pending?: boolean
     errors?: Record<string, string[]>
     message?: string
+    includeEmpty?: boolean
+    cancellable?: boolean
+    formId?: string
 }>(), {
+    values: () => ({}),
     pending: false,
     errors: () => ({}),
     message: '',
+    includeEmpty: false,
+    cancellable: false,
+    formId: undefined,
 })
 
 const emit = defineEmits<{
     submit: [body: EducationCreateBody]
+    cancel: []
 }>()
 
 const textValues = reactive<Record<string, string>>({})
 const checks = reactive<Record<string, boolean>>({})
 
 for (const field of props.fields) {
+    const initial = props.values[field.key]
+
     if (field.checkbox) {
-        checks[field.key] = false
+        checks[field.key] = initial === true
     } else {
-        textValues[field.key] = ''
+        textValues[field.key] = typeof initial === 'string' ? initial : ''
     }
 }
 
@@ -103,15 +124,17 @@ function submit() {
 
     for (const field of props.fields) {
         if (field.checkbox) {
-            if (checks[field.key]) {
-                body[field.key] = true
+            if (props.includeEmpty || checks[field.key]) {
+                body[field.key] = checks[field.key]
             }
             continue
         }
 
         const value = textValues[field.key].trim()
 
-        if (value !== '') {
+        if (props.includeEmpty) {
+            body[field.key] = value === '' ? null : value
+        } else if (value !== '') {
             body[field.key] = value
         }
     }
