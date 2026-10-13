@@ -10,24 +10,21 @@
         aria-modal="true"
         aria-labelledby="confirm-title"
         tabindex="-1"
-        class="w-full max-w-sm space-y-4 rounded-md border border-linear-border bg-linear-surface p-6 outline-none"
+        class="relative w-full max-w-sm space-y-4 rounded-md border border-linear-border bg-linear-surface p-6 outline-none"
     >
-      <p id="confirm-title" class="text-[11px] font-bold uppercase tracking-widest text-linear-red">{{ title }}</p>
+      <button
+          type="button"
+          class="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-md border border-linear-border text-sm leading-none text-linear-secondary transition-colors hover:border-linear-green hover:text-linear-green disabled:opacity-40"
+          aria-label="Close"
+          :disabled="pending"
+          @click="emit('cancel')"
+      >
+        ×
+      </button>
+      <p id="confirm-title" class="pr-10 text-[11px] font-bold uppercase tracking-widest text-linear-red">{{ title }}</p>
       <p class="text-sm uppercase tracking-wide text-linear-text">{{ message }}</p>
       <p v-if="error" class="text-xs uppercase tracking-wide text-linear-red" role="alert">{{ error }}</p>
-      <div class="flex items-center gap-4">
-        <div class="w-full max-w-xs">
-          <BaseButton variant="danger" :disabled="pending" @click="emit('confirm')">{{ confirmLabel }}</BaseButton>
-        </div>
-        <button
-            type="button"
-            class="text-[11px] font-bold uppercase tracking-widest text-linear-secondary hover:text-linear-text"
-            :disabled="pending"
-            @click="emit('cancel')"
-        >
-          Cancel
-        </button>
-      </div>
+      <BaseButton variant="danger" :disabled="pending" @click="emit('confirm')">{{ confirmLabel }}</BaseButton>
     </div>
   </div>
 </template>

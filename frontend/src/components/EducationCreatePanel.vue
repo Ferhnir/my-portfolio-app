@@ -1,6 +1,16 @@
 <template>
-  <form :id="formId" class="space-y-4 rounded-md border border-linear-border bg-linear-surface p-6" @submit.prevent="submit">
-    <p class="text-[11px] font-bold uppercase tracking-widest text-linear-red">{{ title }}</p>
+  <form :id="formId" class="relative space-y-4 rounded-md border border-linear-border bg-linear-surface p-6" @submit.prevent="submit">
+    <button
+        v-if="cancellable"
+        type="button"
+        class="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-md border border-linear-border text-sm leading-none text-linear-secondary transition-colors hover:border-linear-green hover:text-linear-green disabled:opacity-40"
+        aria-label="Close"
+        :disabled="pending"
+        @click="emit('cancel')"
+    >
+      ×
+    </button>
+    <p class="pr-10 text-[11px] font-bold uppercase tracking-widest text-linear-red">{{ title }}</p>
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
       <label
@@ -52,19 +62,7 @@
       {{ message }}
     </p>
 
-    <div class="flex items-center gap-4">
-      <div class="w-full max-w-xs">
-        <BaseButton type="submit" :disabled="pending">{{ submitLabel }}</BaseButton>
-      </div>
-      <button
-          v-if="cancellable"
-          type="button"
-          class="text-[11px] font-bold uppercase tracking-widest text-linear-secondary hover:text-linear-text"
-          @click="emit('cancel')"
-      >
-        Cancel
-      </button>
-    </div>
+    <BaseButton type="submit" :disabled="pending">{{ submitLabel }}</BaseButton>
   </form>
 </template>
 
