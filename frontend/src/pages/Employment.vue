@@ -16,24 +16,33 @@
         @edit="startEdit"
         @remove="onRemove"
     >
-      <EducationCreatePanel
-          v-if="isAuthenticated"
-          :key="formKey"
-          :title="editing ? 'Edit employment' : 'Add employment'"
-          :submit-label="editing ? 'Save' : 'Add employment'"
-          id-prefix="employment"
-          form-id="employment-form"
-          :fields="employmentFields"
-          :values="formValues"
-          :include-empty="editing !== null"
-          :cancellable="editing !== null"
-          :pending="creating"
-          :errors="fieldErrors"
-          :message="formMessage"
-          @submit="onSubmit"
-          @cancel="cancelEdit"
-      />
+      <BaseButton v-if="isAuthenticated" type="button" @click="openCreate">Add new record</BaseButton>
     </EducationSection>
+
+    <div
+        v-if="formOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 py-8"
+        @click.self="closeForm"
+    >
+      <div class="max-h-full w-full max-w-3xl overflow-y-auto">
+        <EducationCreatePanel
+            :key="formKey"
+            :title="editing ? 'Edit employment' : 'Add employment'"
+            :submit-label="editing ? 'Save' : 'Add employment'"
+            id-prefix="employment"
+            form-id="employment-form"
+            :fields="employmentFields"
+            :values="formValues"
+            :include-empty="editing !== null"
+            :cancellable="true"
+            :pending="creating"
+            :errors="fieldErrors"
+            :message="formMessage"
+            @submit="onSubmit"
+            @cancel="closeForm"
+        />
+      </div>
+    </div>
 
     <ConfirmDialog
         :open="pendingDelete !== null"
@@ -49,9 +58,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { ApiError } from '@/api/client'
 import { isAuthenticated } from '@/auth'
+import BaseButton from '@/components/BaseButton.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import EducationCreatePanel from '@/components/EducationCreatePanel.vue'
 import EducationSection from '@/components/EducationSection.vue'
@@ -61,6 +71,7 @@ import type { EducationCreateBody } from '@/types/education'
 import type { Employment } from '@/types/employment'
 
 const formKey = ref(0)
+const formOpen = ref(false)
 const fieldErrors = ref<Record<string, string[]>>({})
 const formMessage = ref('')
 const editing = ref<Employment | null>(null)
@@ -91,7 +102,16 @@ function resetForm() {
     editing.value = null
     fieldErrors.value = {}
     formMessage.value = ''
+    formOpen.value = false
     formKey.value += 1
+}
+
+function openCreate() {
+    editing.value = null
+    fieldErrors.value = {}
+    formMessage.value = ''
+    formKey.value += 1
+    formOpen.value = true
 }
 
 function startEdit(id: number) {
@@ -99,15 +119,32 @@ function startEdit(id: number) {
     fieldErrors.value = {}
     formMessage.value = ''
     formKey.value += 1
-
-    nextTick(() => {
-        document.getElementById('employment-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    })
+    formOpen.value = true
 }
 
-function cancelEdit() {
+function closeForm() {
+    if (creating.value) {
+        return
+    }
+
     resetForm()
 }
+
+function onFormKey(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+        closeForm()
+    }
+}
+
+watch(formOpen, (open) => {
+    if (open) {
+        window.addEventListener('keydown', onFormKey)
+    } else {
+        window.removeEventListener('keydown', onFormKey)
+    }
+})
+
+onUnmounted(() => window.removeEventListener('keydown', onFormKey))
 
 function onRemove(id: number) {
     pendingDelete.value = employments.value.items.find((item) => item.id === id) ?? null
