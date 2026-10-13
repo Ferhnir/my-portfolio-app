@@ -3,11 +3,15 @@
 .env
 .env.backup
 .env.production
+.env.local
+.env.*.local
 .phpactor.json
 .phpunit.result.cache
 ./dynamic
 /.bmad/
 /.claude/
+/.codex
+/.cursor/
 /.fleet
 /.idea
 /.kilo/
@@ -22,6 +26,7 @@
 /node_modules
 /public/assets
 /public/build
+/public/fonts-manifest.dev.json
 /public/hot
 /public/storage
 /storage/*.key
@@ -29,6 +34,7 @@
 /storage/tenant*
 /tests/cleanup-test-databases.sh
 /vendor
+_ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db

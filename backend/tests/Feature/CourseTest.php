@@ -11,9 +11,16 @@ class CourseTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_cannot_manage_courses(): void
+    public function test_guest_can_list_courses(): void
     {
-        $this->getJson('/api/courses')->assertUnauthorized();
+        $this->getJson('/api/courses')->assertOk();
+    }
+
+    public function test_guest_cannot_create_a_course(): void
+    {
+        $this->postJson('/api/courses', [
+            'name' => 'Example',
+        ])->assertUnauthorized();
     }
 
     public function test_store_appends_when_sort_order_is_omitted(): void

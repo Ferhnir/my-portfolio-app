@@ -30,7 +30,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/education',
         name: 'education',
-        component: () => import('@/pages/Employment.vue')
+        component: () => import('@/pages/Education.vue')
     },
     {
         path: '/api-docs',

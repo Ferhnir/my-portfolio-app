@@ -11,9 +11,16 @@ class EducationHistoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_cannot_manage_education_history(): void
+    public function test_guest_can_list_education_history(): void
     {
-        $this->getJson('/api/education-histories')->assertUnauthorized();
+        $this->getJson('/api/education-histories')->assertOk();
+    }
+
+    public function test_guest_cannot_create_education_history(): void
+    {
+        $this->postJson('/api/education-histories', [
+            'school_name' => 'Example',
+        ])->assertUnauthorized();
     }
 
     public function test_store_appends_when_sort_order_is_omitted(): void

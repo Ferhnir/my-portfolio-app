@@ -11,9 +11,16 @@ class CertificateTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_cannot_manage_certificates(): void
+    public function test_guest_can_list_certificates(): void
     {
-        $this->getJson('/api/certificates')->assertUnauthorized();
+        $this->getJson('/api/certificates')->assertOk();
+    }
+
+    public function test_guest_cannot_create_a_certificate(): void
+    {
+        $this->postJson('/api/certificates', [
+            'name' => 'Example',
+        ])->assertUnauthorized();
     }
 
     public function test_store_appends_when_sort_order_is_omitted(): void

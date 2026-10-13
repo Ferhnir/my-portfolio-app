@@ -20,6 +20,10 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::get('tech-stack', [TechStackController::class, 'index'])->name('tech-stack.index');
 
+Route::get('education-histories', [EducationHistoryController::class, 'index'])->name('education-histories.index');
+Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
+Route::get('certificates', [CertificateController::class, 'index'])->name('certificates.index');
+
 Route::middleware(['auth:sanctum'])->group(function () {
     /* ========================================= */
     /* TECH STACK - GROUP */
@@ -72,17 +76,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     /* EDUCATION HISTORY */
     /* ========================================= */
     Route::apiResource('education-histories', EducationHistoryController::class)
+        ->except(['index'])
         ->parameters(['education-histories' => 'educationHistory']);
 
     /* ========================================= */
     /* COURSES */
     /* ========================================= */
     Route::apiResource('courses', CourseController::class)
+        ->except(['index'])
         ->parameters(['courses' => 'course']);
 
     /* ========================================= */
     /* CERTIFICATES */
     /* ========================================= */
     Route::apiResource('certificates', CertificateController::class)
+        ->except(['index'])
         ->parameters(['certificates' => 'certificate']);
 });
