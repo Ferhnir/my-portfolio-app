@@ -34,6 +34,24 @@ services:
     networks:
       - dev-network
 
+  # Local S3 is the shared SeaweedFS container on dev-stack_dev-network.
+  # It is started from ~/dev-containers/seaweedfs, not from this stack.
+  # Other containers reach it at http://seaweedfs:8333. The host uses http://localhost:8333.
+  # seaweedfs:
+  #   image: chrislusf/seaweedfs
+  #   container_name: seaweedfs
+  #   command: mini -dir=/data
+  #   environment:
+  #     AWS_ACCESS_KEY_ID: admin
+  #     AWS_SECRET_ACCESS_KEY: secret
+  #     S3_BUCKET: local
+  #   ports:
+  #     - "8333:8333"
+  #   volumes:
+  #     - seaweedfs_data:/data
+  #   networks:
+  #     - dev-network
+
 networks:
   dev-network:
     name: dev-stack_dev-network # Tells Docker the exact real name of your cache network
