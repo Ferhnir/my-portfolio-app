@@ -64,7 +64,26 @@ class CaseStudyTest extends TestCase
     {
         $caseStudy = $this->caseStudy('Draft', CaseStudy::STATUS_DRAFT);
 
-        $this->getJson('/api/case-studies/'.$caseStudy->id)->assertNotFound();
+        $this->getJson('/api/case-studies/'.$caseStudy->id)
+            ->assertNotFound()
+            ->assertJsonPath('message', 'Resource not found.');
+    }
+
+    public function test_a_bearer_token_can_read_a_draft(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test')->plainTextToken;
+        $caseStudy = $this->caseStudy('Draft', CaseStudy::STATUS_DRAFT);
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/case-studies')
+            ->assertOk()
+            ->assertJsonFragment(['title' => 'Draft']);
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/case-studies/'.$caseStudy->id)
+            ->assertOk()
+            ->assertJsonPath('data.title', 'Draft');
     }
 
     public function test_store_appends_when_sort_order_is_omitted(): void

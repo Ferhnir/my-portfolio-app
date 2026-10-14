@@ -42,9 +42,17 @@ class CaseStudyService
     public function delete(CaseStudy $caseStudy): void
     {
         DB::transaction(function () use ($caseStudy): void {
-            $caseStudy->load('sections.blocks.points');
+            $caseStudy->load(['assets', 'sections.assets', 'sections.blocks.points']);
+
+            foreach ($caseStudy->assets as $asset) {
+                $asset->delete();
+            }
 
             foreach ($caseStudy->sections as $section) {
+                foreach ($section->assets as $asset) {
+                    $asset->delete();
+                }
+
                 foreach ($section->blocks as $block) {
                     foreach ($block->points as $point) {
                         $point->delete();

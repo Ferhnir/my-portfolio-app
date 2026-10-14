@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Concerns\GuardsCaseStudyVisibility;
 use App\Http\Requests\CaseStudySectionStoreRequest;
 use App\Http\Requests\CaseStudySectionUpdateRequest;
 use App\Http\Resources\CaseStudySectionResource;
@@ -15,15 +14,13 @@ use Throwable;
 
 class CaseStudySectionController extends Controller
 {
-    use GuardsCaseStudyVisibility;
-
     public function __construct(private readonly CaseStudySectionService $sectionService) {}
 
     public function index(CaseStudy $caseStudy): AnonymousResourceCollection
     {
-        $this->guardCaseStudy($caseStudy);
+        $this->authorize('view', $caseStudy);
 
-        $sections = $caseStudy->sections()->with('blocks.points')->get();
+        $sections = $caseStudy->sections()->with(['assets', 'blocks.points'])->get();
 
         return CaseStudySectionResource::collection($sections);
     }
@@ -33,6 +30,8 @@ class CaseStudySectionController extends Controller
      */
     public function store(CaseStudySectionStoreRequest $request, CaseStudy $caseStudy): CaseStudySectionResource
     {
+        $this->authorize('update', $caseStudy);
+
         $section = $this->sectionService->create($caseStudy, $request->validated());
 
         return new CaseStudySectionResource($section);
@@ -40,9 +39,9 @@ class CaseStudySectionController extends Controller
 
     public function show(CaseStudy $caseStudy, CaseStudySection $section): CaseStudySectionResource
     {
-        $this->guardCaseStudy($caseStudy);
+        $this->authorize('view', $caseStudy);
 
-        $section->load('blocks.points');
+        $section->load(['assets', 'blocks.points']);
 
         return new CaseStudySectionResource($section);
     }
@@ -55,6 +54,8 @@ class CaseStudySectionController extends Controller
         CaseStudy $caseStudy,
         CaseStudySection $section,
     ): CaseStudySectionResource {
+        $this->authorize('update', $caseStudy);
+
         $section = $this->sectionService->update($section, $request->validated());
 
         return new CaseStudySectionResource($section);
@@ -65,6 +66,8 @@ class CaseStudySectionController extends Controller
      */
     public function destroy(CaseStudy $caseStudy, CaseStudySection $section): Response
     {
+        $this->authorize('update', $caseStudy);
+
         $this->sectionService->delete($section);
 
         return response()->noContent();

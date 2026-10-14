@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 abstract class Controller
 {
+    use AuthorizesRequests;
+
     protected function success(
         array $data = [],
         string $message = 'Success',
         int $status = Response::HTTP_OK
-    ): JsonResponse
-    {
+    ): JsonResponse {
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => $message,
-            'data'    => $data,
+            'data' => $data,
         ], $status);
     }
 
@@ -24,12 +26,11 @@ abstract class Controller
         string $message = 'Error',
         array $errors = [],
         int $status = Response::HTTP_UNPROCESSABLE_ENTITY
-    ): JsonResponse
-    {
+    ): JsonResponse {
         return response()->json([
-            'status'  => 'error',
+            'status' => 'error',
             'message' => $message,
-            'errors'  => $errors,
+            'errors' => $errors,
         ], $status);
     }
 }

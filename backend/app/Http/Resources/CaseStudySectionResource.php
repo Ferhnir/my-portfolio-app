@@ -18,6 +18,7 @@ class CaseStudySectionResource extends JsonResource
             'title' => $this->title,
             'introduction' => $this->introduction,
             'sort_order' => $this->sort_order,
+            'assets' => AssetResource::collection($this->whenLoaded('assets')),
             'blocks' => CaseStudyBlockResource::collection($this->whenLoaded('blocks')),
         ];
     }

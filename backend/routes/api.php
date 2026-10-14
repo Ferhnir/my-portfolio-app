@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\CaseStudyBlockController;
 use App\Http\Controllers\CaseStudyController;
 use App\Http\Controllers\CaseStudyPointController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\TechStackController;
 use App\Http\Controllers\TechStackGroupCategoryController;
 use App\Http\Controllers\TechStackGroupController;
 use App\Http\Controllers\TechStackPlacementController;
+use App\Http\Middleware\UseSanctumGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,7 +32,7 @@ Route::get('education-histories', [EducationHistoryController::class, 'index'])-
 Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('certificates', [CertificateController::class, 'index'])->name('certificates.index');
 
-Route::scopeBindings()->group(function () {
+Route::middleware(UseSanctumGuard::class)->scopeBindings()->group(function () {
     Route::get('case-studies', [CaseStudyController::class, 'index'])->name('case-studies.index');
     Route::get('case-studies/{caseStudy}', [CaseStudyController::class, 'show'])->name('case-studies.show');
     Route::get('case-studies/{caseStudy}/sections', [CaseStudySectionController::class, 'index'])->name('case-studies.sections.index');
@@ -39,6 +41,8 @@ Route::scopeBindings()->group(function () {
     Route::get('case-studies/{caseStudy}/sections/{section}/blocks/{block}', [CaseStudyBlockController::class, 'show'])->name('case-studies.sections.blocks.show');
     Route::get('case-studies/{caseStudy}/sections/{section}/blocks/{block}/points', [CaseStudyPointController::class, 'index'])->name('case-studies.sections.blocks.points.index');
     Route::get('case-studies/{caseStudy}/sections/{section}/blocks/{block}/points/{point}', [CaseStudyPointController::class, 'show'])->name('case-studies.sections.blocks.points.show');
+    Route::get('case-studies/{caseStudy}/assets', [AssetController::class, 'index'])->name('case-studies.assets.index');
+    Route::get('case-studies/{caseStudy}/sections/{section}/assets', [AssetController::class, 'sectionIndex'])->name('case-studies.sections.assets.index');
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -150,4 +154,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
             'blocks' => 'block',
             'points' => 'point',
         ]);
+
+    /* ========================================= */
+    /* ASSETS */
+    /* ========================================= */
+    Route::scopeBindings()->group(function () {
+        Route::post('case-studies/{caseStudy}/assets', [AssetController::class, 'store'])
+            ->name('case-studies.assets.store');
+        Route::patch('case-studies/{caseStudy}/assets/{asset}', [AssetController::class, 'update'])
+            ->name('case-studies.assets.update');
+        Route::delete('case-studies/{caseStudy}/assets/{asset}', [AssetController::class, 'destroy'])
+            ->name('case-studies.assets.destroy');
+
+        Route::post('case-studies/{caseStudy}/sections/{section}/assets', [AssetController::class, 'sectionStore'])
+            ->name('case-studies.sections.assets.store');
+        Route::patch('case-studies/{caseStudy}/sections/{section}/assets/{asset}', [AssetController::class, 'sectionUpdate'])
+            ->name('case-studies.sections.assets.update');
+        Route::delete('case-studies/{caseStudy}/sections/{section}/assets/{asset}', [AssetController::class, 'sectionDestroy'])
+            ->name('case-studies.sections.assets.destroy');
+    });
 });

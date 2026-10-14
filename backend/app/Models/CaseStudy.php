@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy(CaseStudyObserver::class)]
@@ -58,5 +59,12 @@ class CaseStudy extends Model implements SortableModel
     public function sections(): HasMany
     {
         return $this->hasMany(CaseStudySection::class)->orderBy(CaseStudySection::SORTABLE_COLUMN);
+    }
+
+    public function assets(): MorphMany
+    {
+        return $this->morphMany(Asset::class, 'assetable')
+            ->orderBy('collection')
+            ->orderBy(Asset::SORTABLE_COLUMN);
     }
 }
