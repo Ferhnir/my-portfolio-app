@@ -41,6 +41,19 @@
             :placeholder="field.placeholder || 'Select a date'"
         />
 
+        <select
+            v-else-if="field.type === 'select'"
+            :id="fieldId(field.key)"
+            v-model="textValues[field.key]"
+            class="w-full rounded-md border border-linear-border bg-linear-field px-3 py-2 text-xs uppercase tracking-wide text-linear-text outline-none focus:border-linear-border-hover"
+            :name="field.key"
+            :required="field.required"
+        >
+          <option v-for="option in field.options" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+
         <BaseInput
             v-else-if="!field.checkbox"
             :id="fieldId(field.key)"
@@ -57,6 +70,8 @@
         </p>
       </label>
     </div>
+
+    <slot />
 
     <p v-if="message && Object.keys(errors).length === 0" class="text-xs uppercase tracking-wide text-linear-red" role="alert">
       {{ message }}

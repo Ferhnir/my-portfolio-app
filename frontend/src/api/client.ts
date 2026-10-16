@@ -1,3 +1,4 @@
+import { setToken } from '@/auth'
 import { toastApiError } from '@/toast'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'https://api.portfolio.test'
@@ -36,22 +37,27 @@ export async function api<T>(path: string, { method = 'GET', body, auth = true, 
         Accept: 'application/json',
     }
 
-    if (body !== undefined) {
+    const isForm = body instanceof FormData
+
+    if (body !== undefined && !isForm) {
         headers['Content-Type'] = 'application/json'
     }
+
+    let sentToken = false
 
     if (auth) {
         const token = localStorage.getItem('sanctum_token')
 
         if (token) {
             headers.Authorization = `Bearer ${token}`
+            sentToken = true
         }
     }
 
     const response = await fetch(`${baseUrl}/api${path}`, {
         method,
         headers,
-        body: body === undefined ? undefined : JSON.stringify(body),
+        body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     })
 
     const payload = await response.json().catch(() => ({})) as ApiFailure & T
@@ -62,6 +68,10 @@ export async function api<T>(path: string, { method = 'GET', body, auth = true, 
             response.status,
             payload.errors || {},
         )
+
+        if (response.status === 401 && sentToken) {
+            setToken('')
+        }
 
         if (toast) {
             toastApiError(error)

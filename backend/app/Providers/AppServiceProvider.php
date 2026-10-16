@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Models\CaseStudy;
+use App\Models\CaseStudySection;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,5 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Relation::enforceMorphMap([
+            'user' => User::class,
+            'case_study' => CaseStudy::class,
+            'case_study_section' => CaseStudySection::class,
+        ]);
     }
 }

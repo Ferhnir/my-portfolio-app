@@ -50,7 +50,8 @@ export type EducationCreateBody = Record<string, string | boolean | null>
 export interface EducationFormField {
     key: string
     label: string
-    type?: 'text' | 'date' | 'url'
+    type?: 'text' | 'date' | 'url' | 'select'
+    options?: { value: string, label: string }[]
     multiline?: boolean
     checkbox?: boolean
     required?: boolean

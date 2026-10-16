@@ -8,6 +8,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ApiExceptionRenderer
@@ -52,6 +53,21 @@ class ApiExceptionRenderer
             return ApiException::response(
                 message: __('exceptions.access_restricted'),
                 status: $status,
+            );
+        });
+
+        $exceptions->render(function (HttpException $e, Request $request) {
+            if (! $this->wantsJson($request) || $e->getStatusCode() !== Response::HTTP_NOT_FOUND) {
+                return null;
+            }
+
+            if ($e instanceof NotFoundHttpException) {
+                return null;
+            }
+
+            return ApiException::response(
+                message: __('exceptions.model_not_found'),
+                status: Response::HTTP_NOT_FOUND,
             );
         });
     }
