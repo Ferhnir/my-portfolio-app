@@ -37,7 +37,10 @@ class Asset extends Model implements SortableModel
     protected $fillable = [
         'collection',
         'disk',
+        'archive_disk',
         'path',
+        'display_path',
+        'thumb_path',
         'original_name',
         'mime',
         'size',

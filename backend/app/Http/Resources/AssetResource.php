@@ -20,11 +20,23 @@ class AssetResource extends JsonResource
             'collection' => $this->collection,
             'disk' => $this->disk,
             'path' => $this->path,
-            'url' => Storage::disk($this->disk)->url($this->path),
+            'url' => $this->publicUrl($this->display_path) ?? $this->publicUrl($this->path),
+            'thumb_url' => $this->publicUrl($this->thumb_path)
+                ?? $this->publicUrl($this->display_path)
+                ?? $this->publicUrl($this->path),
             'original_name' => $this->original_name,
             'mime' => $this->mime,
             'size' => $this->size,
             'sort_order' => $this->sort_order,
         ];
+    }
+
+    private function publicUrl(?string $path): ?string
+    {
+        if ($path === null || $path === '') {
+            return null;
+        }
+
+        return Storage::disk($this->disk)->url($path);
     }
 }

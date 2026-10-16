@@ -199,7 +199,7 @@ class CaseStudyTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_a_card_accepts_one_point_and_a_group_accepts_many(): void
+    public function test_a_card_keeps_a_list_under_its_first_point(): void
     {
         $user = User::factory()->create();
         $caseStudy = $this->caseStudy('Published', CaseStudy::STATUS_PUBLISHED);
@@ -222,8 +222,8 @@ class CaseStudyTest extends TestCase
             ->postJson($this->pointsUrl($caseStudy->id, $section->id, $cardId), [
                 'body' => 'Second point',
             ])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['body']);
+            ->assertCreated()
+            ->assertJsonPath('data.sort_order', 2);
 
         $groupId = $this->actingAs($user, 'sanctum')
             ->postJson('/api/case-studies/'.$caseStudy->id.'/sections/'.$section->id.'/blocks', [

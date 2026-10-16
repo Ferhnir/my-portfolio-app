@@ -18,7 +18,7 @@ class CaseStudyController extends Controller
 
     public function index(): AnonymousResourceCollection
     {
-        $query = CaseStudy::query()->orderBy(CaseStudy::SORTABLE_COLUMN);
+        $query = CaseStudy::query()->with('assets')->orderBy(CaseStudy::SORTABLE_COLUMN);
 
         if (Gate::denies('viewDrafts', CaseStudy::class)) {
             $query->where('status', CaseStudy::STATUS_PUBLISHED);

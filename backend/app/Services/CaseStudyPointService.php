@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\CaseStudyBlock;
 use App\Models\CaseStudyPoint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class CaseStudyPointService
@@ -18,12 +17,6 @@ class CaseStudyPointService
     public function create(CaseStudyBlock $block, array $attributes): CaseStudyPoint
     {
         return DB::transaction(function () use ($block, $attributes): CaseStudyPoint {
-            if ($block->layout === CaseStudyBlock::LAYOUT_CARD && $block->points()->exists()) {
-                throw ValidationException::withMessages([
-                    'body' => 'A card already has its point.',
-                ]);
-            }
-
             $point = $block->points()->create($attributes);
 
             return $point->refresh();

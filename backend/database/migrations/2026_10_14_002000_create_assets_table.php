@@ -14,7 +14,10 @@ return new class extends Migration
             $table->morphs('assetable');
             $table->string('collection');
             $table->string('disk');
+            $table->string('archive_disk')->nullable();
             $table->string('path');
+            $table->string('display_path')->nullable();
+            $table->string('thumb_path')->nullable();
             $table->string('original_name')->nullable();
             $table->string('mime', 127)->nullable();
             $table->unsignedBigInteger('size')->nullable();

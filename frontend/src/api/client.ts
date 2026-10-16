@@ -36,7 +36,9 @@ export async function api<T>(path: string, { method = 'GET', body, auth = true, 
         Accept: 'application/json',
     }
 
-    if (body !== undefined) {
+    const isForm = body instanceof FormData
+
+    if (body !== undefined && !isForm) {
         headers['Content-Type'] = 'application/json'
     }
 
@@ -51,7 +53,7 @@ export async function api<T>(path: string, { method = 'GET', body, auth = true, 
     const response = await fetch(`${baseUrl}/api${path}`, {
         method,
         headers,
-        body: body === undefined ? undefined : JSON.stringify(body),
+        body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     })
 
     const payload = await response.json().catch(() => ({})) as ApiFailure & T

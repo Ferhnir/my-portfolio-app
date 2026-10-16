@@ -48,10 +48,14 @@ class AssetTest extends TestCase
             ->assertJsonPath('data.sort_order', 1)
             ->assertJsonPath('data.original_name', 'cover.jpg');
 
-        $path = $response->json('data.path');
+        $asset = Asset::query()->findOrFail($response->json('data.id'));
 
-        $this->assertIsString($path);
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('public')->assertExists($asset->path);
+        Storage::disk('public')->assertExists($asset->display_path);
+        Storage::disk('public')->assertExists($asset->thumb_path);
+        $response
+            ->assertJsonPath('data.url', Storage::disk('public')->url($asset->display_path))
+            ->assertJsonPath('data.thumb_url', Storage::disk('public')->url($asset->thumb_path));
         $this->assertDatabaseHas('assets', [
             'id' => $response->json('data.id'),
             'assetable_type' => 'case_study',
@@ -88,13 +92,16 @@ class AssetTest extends TestCase
         $user = User::factory()->create();
         $caseStudy = $this->caseStudy(CaseStudy::STATUS_DRAFT);
 
-        $firstPath = $this->actingAs($user, 'sanctum')
+        $firstId = $this->actingAs($user, 'sanctum')
             ->post($this->assetsUrl($caseStudy), [
                 'file' => UploadedFile::fake()->image('first.jpg'),
                 'collection' => Asset::COLLECTION_COVER,
             ], ['Accept' => 'application/json'])
             ->assertCreated()
-            ->json('data.path');
+            ->json('data.id');
+
+        $first = Asset::query()->findOrFail($firstId);
+        $firstFiles = [$first->path, $first->display_path, $first->thumb_path];
 
         $this->actingAs($user, 'sanctum')
             ->post($this->assetsUrl($caseStudy), [
@@ -106,8 +113,15 @@ class AssetTest extends TestCase
             ->assertJsonPath('data.sort_order', 1);
 
         $this->assertSame(1, $caseStudy->assets()->count());
-        Storage::disk('public')->assertMissing($firstPath);
-        Storage::disk('public')->assertExists($caseStudy->assets()->first()->path);
+
+        foreach ($firstFiles as $path) {
+            Storage::disk('public')->assertMissing($path);
+        }
+
+        $second = $caseStudy->assets()->first();
+        Storage::disk('public')->assertExists($second->path);
+        Storage::disk('public')->assertExists($second->display_path);
+        Storage::disk('public')->assertExists($second->thumb_path);
     }
 
     public function test_gallery_images_can_be_inserted_and_reordered(): void
@@ -200,11 +214,18 @@ class AssetTest extends TestCase
         $user = User::factory()->create();
         $caseStudy = $this->caseStudy(CaseStudy::STATUS_DRAFT);
         $path = 'assets/case_study/'.$caseStudy->id.'/gallery/one.jpg';
+        $display = 'assets/case_study/'.$caseStudy->id.'/gallery/one-display.webp';
+        $thumb = 'assets/case_study/'.$caseStudy->id.'/gallery/one-thumb.webp';
         Storage::disk('public')->put($path, 'image');
+        Storage::disk('public')->put($display, 'display');
+        Storage::disk('public')->put($thumb, 'thumb');
         $asset = $caseStudy->assets()->create([
             'collection' => Asset::COLLECTION_GALLERY,
             'disk' => 'public',
+            'archive_disk' => 'public',
             'path' => $path,
+            'display_path' => $display,
+            'thumb_path' => $thumb,
             'original_name' => 'one.jpg',
         ]);
 
@@ -214,6 +235,8 @@ class AssetTest extends TestCase
 
         $this->assertSoftDeleted($asset);
         Storage::disk('public')->assertMissing($path);
+        Storage::disk('public')->assertMissing($display);
+        Storage::disk('public')->assertMissing($thumb);
     }
 
     public function test_upload_rejects_a_file_that_is_not_an_image(): void
