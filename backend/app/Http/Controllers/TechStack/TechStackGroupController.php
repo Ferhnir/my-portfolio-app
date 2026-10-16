@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\TechStack;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\TechStackGroupStoreRequest;
 use App\Http\Requests\TechStackGroupUpdateRequest;
 use App\Http\Resources\TechStackGroupResource;
@@ -18,6 +19,7 @@ class TechStackGroupController extends Controller
             $groups = TechStackGroup::query()
                 ->orderBy('sort_order')
                 ->get();
+
             return TechStackGroupResource::collection($groups)->resolve();
         });
 

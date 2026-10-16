@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\TechStack;
 
 use App\Exceptions\ApiException;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\TechStackGroupCategoryStoreRequest;
 use App\Http\Requests\TechStackGroupCategoryUpdateRequest;
 use App\Http\Resources\TechStackGroupCategoryResource;
@@ -10,11 +11,11 @@ use App\Models\TechStackCategory;
 use App\Models\TechStackGroup;
 use App\Models\TechStackGroupCategory;
 use App\Services\ModelLinkService;
+use Exception;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Throwable;
-use Exception;
 
 class TechStackGroupCategoryController extends Controller
 {
@@ -29,7 +30,7 @@ class TechStackGroupCategoryController extends Controller
 
         try {
 
-            $modelLinkService = new ModelLinkService(new TechStackGroupCategory())
+            $modelLinkService = new ModelLinkService(new TechStackGroupCategory)
                 ->setLinkModel(
                     linkableModel: $techStackGroup,
                     linkModelKey: TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY
@@ -40,8 +41,7 @@ class TechStackGroupCategoryController extends Controller
                 )
                 ->setSortOrder($request->input(key: TechStackGroupCategory::SORTABLE_COLUMN));
 
-            $techStackGroupCategory = DB::transaction( fn() => $modelLinkService->createLink());
-
+            $techStackGroupCategory = DB::transaction(fn () => $modelLinkService->createLink());
 
             $techStackGroupCategory->load([
                 'techStackGroup',
@@ -72,7 +72,7 @@ class TechStackGroupCategoryController extends Controller
 
             $modelLinkService = new ModelLinkService($techStackGroupCategory);
 
-            //Re-assign category to different group
+            // Re-assign category to different group
             if ($request->filled(TechStackGroupCategory::LINKABLE_MODEL_PARENT_KEY)) {
 
                 $linkableModel = TechStackGroup::query()->findOrFail(
@@ -85,7 +85,7 @@ class TechStackGroupCategoryController extends Controller
                 );
             }
 
-            //Update Sort Order vba
+            // Update Sort Order vba
             if ($request->filled(TechStackGroupCategory::SORTABLE_COLUMN)) {
                 $modelLinkService->setSortOrder($request->input(TechStackGroupCategory::SORTABLE_COLUMN));
             }
@@ -99,7 +99,7 @@ class TechStackGroupCategoryController extends Controller
 
             return new TechStackGroupCategoryResource($techStackGroupCategory);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new ApiException(
                 message: __('exceptions.something_went_wrong'),
                 status: ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,

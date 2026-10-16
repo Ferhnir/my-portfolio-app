@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\TechStack;
 
+use App\Http\Controllers\Controller;
 use App\Http\Resources\TechStackGroupResource;
 use App\Models\TechStackGroup;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;

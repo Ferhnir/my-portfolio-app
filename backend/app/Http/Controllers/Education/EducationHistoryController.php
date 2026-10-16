@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Education;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\EducationHistoryStoreRequest;
 use App\Http\Requests\EducationHistoryUpdateRequest;
 use App\Http\Resources\EducationHistoryResource;
@@ -62,4 +63,3 @@ class EducationHistoryController extends Controller
         return response()->noContent();
     }
 }
-

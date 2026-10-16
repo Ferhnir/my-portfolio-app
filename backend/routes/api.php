@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\AssetController;
-use App\Http\Controllers\CaseStudyBlockController;
-use App\Http\Controllers\CaseStudyController;
-use App\Http\Controllers\CaseStudyPointController;
-use App\Http\Controllers\CaseStudySectionController;
-use App\Http\Controllers\CertificateController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\EducationHistoryController;
+use App\Http\Controllers\CaseStudy\AssetController;
+use App\Http\Controllers\CaseStudy\CaseStudyBlockController;
+use App\Http\Controllers\CaseStudy\CaseStudyController;
+use App\Http\Controllers\CaseStudy\CaseStudyPointController;
+use App\Http\Controllers\CaseStudy\CaseStudySectionController;
+use App\Http\Controllers\Education\CertificateController;
+use App\Http\Controllers\Education\CourseController;
+use App\Http\Controllers\Education\EducationHistoryController;
 use App\Http\Controllers\EmploymentController;
-use App\Http\Controllers\TechnologyController;
-use App\Http\Controllers\TechStackCategoryController;
-use App\Http\Controllers\TechStackController;
-use App\Http\Controllers\TechStackGroupCategoryController;
-use App\Http\Controllers\TechStackGroupController;
-use App\Http\Controllers\TechStackPlacementController;
+use App\Http\Controllers\TechStack\TechnologyController;
+use App\Http\Controllers\TechStack\TechStackCategoryController;
+use App\Http\Controllers\TechStack\TechStackController;
+use App\Http\Controllers\TechStack\TechStackGroupCategoryController;
+use App\Http\Controllers\TechStack\TechStackGroupController;
+use App\Http\Controllers\TechStack\TechStackPlacementController;
 use App\Http\Middleware\UseSanctumGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;

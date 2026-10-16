@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CaseStudy;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CaseStudyStoreRequest;
 use App\Http\Requests\CaseStudyUpdateRequest;
 use App\Http\Resources\CaseStudyResource;

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\TechStack;
 
+use App\Http\Controllers\Controller;
 use App\Http\Resources\TechStackPlacementResource;
 use App\Models\TechStackPlacement;
 use Illuminate\Http\Request;

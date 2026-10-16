@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\TechStack;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\TechnologyStoreRequest;
 use App\Http\Resources\TechnologyResource;
 use App\Models\Technology;
