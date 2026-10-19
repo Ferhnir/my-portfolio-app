@@ -78,7 +78,7 @@ const sections = computed(() => {
         return rows
     }
 
-    return rows.filter((section) => cardViews(section).length > 0 || wideImages(section.assets).length > 0)
+    return rows.filter((section) => cardViews(section).length > 0 || wideImages(section.assets).some((asset) => asset.collection === 'gallery'))
 })
 
 const formOpen = ref(false)
@@ -92,12 +92,11 @@ const cardItems = ref<CaseStudyCardItemDraft[]>([])
 const fieldErrors = ref<Record<string, string[]>>({})
 const formMessage = ref('')
 
-const imageOpen = ref(false)
-const imageSectionId = ref<number | null>(null)
-const imageCollection = ref<'cover' | 'gallery'>('gallery')
-const imageFiles = ref<File[]>([])
-const imageInputKey = ref(0)
-const imageError = ref('')
+const imageNotice = ref<{
+    sectionId: number | null
+    collection: 'cover' | 'gallery'
+    message: string
+} | null>(null)
 
 const pendingDelete = ref<PendingDelete | null>(null)
 const deleteError = ref('')
@@ -201,33 +200,35 @@ function closeForm() {
     formOpen.value = false
 }
 
-function openImage(sectionId: number | null) {
-    imageSectionId.value = sectionId
-    imageCollection.value = 'gallery'
-    imageFiles.value = []
-    imageInputKey.value += 1
-    imageError.value = ''
-    imageOpen.value = true
+function imageNoticeFor(sectionId: number | null) {
+    const notice = imageNotice.value
+
+    if (!notice || notice.sectionId !== sectionId) {
+        return null
+    }
+
+    return { collection: notice.collection, message: notice.message }
 }
 
-watch(imageCollection, () => {
-    imageFiles.value = []
-    imageInputKey.value += 1
-    imageError.value = ''
-})
+async function onUpload(sectionId: number | null, collection: 'cover' | 'gallery', files: File[]) {
+    const images = files.filter((file) => file.type.startsWith('image/'))
+    const selected = collection === 'cover' ? images.slice(0, 1) : images
 
-function closeImage() {
-    if (saving.value) {
+    if (selected.length === 0) {
+        imageNotice.value = { sectionId, collection, message: 'An image is required.' }
         return
     }
 
-    imageOpen.value = false
-}
+    imageNotice.value = null
+    const result = await uploadImages(sectionId, selected, collection)
 
-function onFile(event: Event) {
-    const input = event.target as HTMLInputElement
-    const selected = [...(input.files ?? [])]
-    imageFiles.value = imageCollection.value === 'cover' ? selected.slice(0, 1) : selected
+    if (result.error) {
+        imageNotice.value = {
+            sectionId,
+            collection,
+            message: result.stored > 0 ? `${result.error} ${result.stored} saved.` : result.error,
+        }
+    }
 }
 
 function onFormKey(event: KeyboardEvent) {
@@ -235,12 +236,11 @@ function onFormKey(event: KeyboardEvent) {
         return
     }
 
-    imageOpen.value = false
     formOpen.value = false
 }
 
-watch([formOpen, imageOpen], ([form, image]) => {
-    if (form || image) {
+watch(formOpen, (form) => {
+    if (form) {
         window.addEventListener('keydown', onFormKey)
     } else {
         window.removeEventListener('keydown', onFormKey)
@@ -275,28 +275,6 @@ async function onSubmit(body: EducationCreateBody) {
             formMessage.value = reason.message
         }
     }
-}
-
-async function onUpload() {
-    imageError.value = ''
-    const files = imageCollection.value === 'cover' ? imageFiles.value.slice(0, 1) : [...imageFiles.value]
-
-    if (files.length === 0) {
-        imageError.value = 'An image is required.'
-        return
-    }
-
-    const result = await uploadImages(imageSectionId.value, files, imageCollection.value)
-
-    if (result.error) {
-        imageFiles.value = files.slice(result.stored)
-        imageError.value = result.stored > 0
-            ? `${result.error} ${result.stored} saved.`
-            : result.error
-        return
-    }
-
-    imageOpen.value = false
 }
 
 function askDelete(target: PendingDelete) {
@@ -423,21 +401,14 @@ watch(caseStudyId, () => {
 
       <CaseStudyImageGrid
           :images="wideImages(caseStudy.assets)"
+          :with-cover="isAuthenticated"
           :can-remove="isAuthenticated"
           :can-add="isAuthenticated"
           :busy="saving"
+          :notice="imageNoticeFor(null)"
+          @add="(collection, files) => onUpload(null, collection, files)"
           @remove="removeImageAsk(null, $event)"
-      >
-        <button
-            v-if="isAuthenticated"
-            type="button"
-            class="flex aspect-[16/9] items-center justify-center gap-3 rounded-md border border-linear-border bg-linear-surface text-xs font-bold uppercase tracking-widest text-linear-text transition-[border-color,box-shadow] duration-200 hover:border-linear-green hover:shadow-[0_0_16px_rgba(140,255,0,0.55),0_0_48px_rgba(140,255,0,0.35)]"
-            @click="openImage(null)"
-        >
-          <span class="text-linear-green">//</span>
-          Add image
-        </button>
-      </CaseStudyImageGrid>
+      />
 
       <section v-for="section in sections" :key="section.id" class="space-y-6">
         <header class="space-y-2">
@@ -477,18 +448,10 @@ watch(caseStudyId, () => {
             :can-remove="isAuthenticated"
             :can-add="isAuthenticated"
             :busy="saving"
+            :notice="imageNoticeFor(section.id)"
+            @add="(collection, files) => onUpload(section.id, collection, files)"
             @remove="removeImageAsk(section.id, $event)"
-        >
-          <button
-              v-if="isAuthenticated"
-              type="button"
-              class="flex aspect-[16/9] items-center justify-center gap-3 rounded-md border border-linear-border bg-linear-surface text-xs font-bold uppercase tracking-widest text-linear-text transition-[border-color,box-shadow] duration-200 hover:border-linear-green hover:shadow-[0_0_16px_rgba(140,255,0,0.55),0_0_48px_rgba(140,255,0,0.35)]"
-              @click="openImage(section.id)"
-          >
-            <span class="text-linear-green">//</span>
-            Add image
-          </button>
-        </CaseStudyImageGrid>
+        />
 
         <div v-if="cardViews(section).length > 0 || isAuthenticated" class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <CaseStudyInfoCard
@@ -543,57 +506,6 @@ watch(caseStudyId, () => {
           <CaseStudyCardItemsField v-if="formKind === 'card'" v-model="cardItems" />
         </EducationCreatePanel>
       </div>
-    </div>
-
-    <div
-        v-if="imageOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 py-8"
-        @click.self="closeImage"
-    >
-      <form class="relative w-full max-w-lg space-y-4 rounded-md border border-linear-border bg-linear-surface p-6" @submit.prevent="onUpload">
-        <button
-            type="button"
-            class="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-md border border-linear-border text-sm leading-none text-linear-secondary transition-colors hover:border-linear-green hover:text-linear-green disabled:opacity-40"
-            aria-label="Close"
-            :disabled="saving"
-            @click="closeImage"
-        >
-          ×
-        </button>
-        <p class="pr-10 text-[11px] font-bold uppercase tracking-widest text-linear-red">Add image</p>
-        <label class="block space-y-2" for="case-image-collection">
-          <span class="block text-[11px] font-bold uppercase tracking-widest text-linear-secondary">Place</span>
-          <select
-              id="case-image-collection"
-              v-model="imageCollection"
-              class="w-full rounded-md border border-linear-border bg-linear-field px-3 py-2 text-xs uppercase tracking-wide text-linear-text outline-none focus:border-linear-border-hover"
-          >
-            <option value="gallery">Gallery</option>
-            <option value="cover">Cover</option>
-          </select>
-        </label>
-        <label class="block space-y-2" for="case-image-file">
-          <span class="block text-[11px] font-bold uppercase tracking-widest text-linear-secondary">
-            {{ imageCollection === 'gallery' ? 'Images' : 'Image' }}
-          </span>
-          <input
-              id="case-image-file"
-              :key="imageInputKey"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              :multiple="imageCollection === 'gallery'"
-              class="w-full text-xs text-linear-secondary file:mr-3 file:rounded-md file:border file:border-linear-border file:bg-linear-field file:px-3 file:py-2 file:text-xs file:uppercase file:tracking-wide file:text-linear-text"
-              @change="onFile"
-          >
-        </label>
-        <ul v-if="imageFiles.length > 1" class="space-y-1">
-          <li v-for="(file, index) in imageFiles" :key="`${file.name}-${index}`" class="text-xs text-linear-secondary">
-            {{ file.name }}
-          </li>
-        </ul>
-        <p v-if="imageError" class="text-xs uppercase tracking-wide text-linear-red" role="alert">{{ imageError }}</p>
-        <BaseButton type="submit" :disabled="saving">Upload</BaseButton>
-      </form>
     </div>
 
     <ConfirmDialog

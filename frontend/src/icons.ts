@@ -2,6 +2,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import {
     faBriefcase,
     faChainBroken,
+    faChevronLeft,
+    faChevronRight,
     faCircleCheck,
     faCode,
     faEnvelope,
@@ -17,6 +19,8 @@ import {
 library.add(
     faBriefcase,
     faChainBroken,
+    faChevronLeft,
+    faChevronRight,
     faCircleCheck,
     faCode,
     faEnvelope,
