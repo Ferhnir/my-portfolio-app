@@ -5,6 +5,7 @@ use App\Http\Controllers\CaseStudy\CaseStudyBlockController;
 use App\Http\Controllers\CaseStudy\CaseStudyController;
 use App\Http\Controllers\CaseStudy\CaseStudyPointController;
 use App\Http\Controllers\CaseStudy\CaseStudySectionController;
+use App\Http\Controllers\Contact\ContactMessageController;
 use App\Http\Controllers\Education\CertificateController;
 use App\Http\Controllers\Education\CourseController;
 use App\Http\Controllers\Education\EducationHistoryController;
@@ -31,6 +32,11 @@ Route::get('employments', [EmploymentController::class, 'index'])->name('employm
 Route::get('education-histories', [EducationHistoryController::class, 'index'])->name('education-histories.index');
 Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('certificates', [CertificateController::class, 'index'])->name('certificates.index');
+
+Route::get('contact-messages/form', [ContactMessageController::class, 'form'])->name('contact-messages.form');
+Route::post('contact-messages', [ContactMessageController::class, 'store'])
+    ->middleware('throttle:contact-messages')
+    ->name('contact-messages.store');
 
 Route::middleware(UseSanctumGuard::class)->scopeBindings()->group(function () {
     Route::get('case-studies', [CaseStudyController::class, 'index'])->name('case-studies.index');
@@ -120,6 +126,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('certificates', CertificateController::class)
         ->except(['index'])
         ->parameters(['certificates' => 'certificate']);
+
+    /* ========================================= */
+    /* CONTACT */
+    /* ========================================= */
+    Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+    Route::get('contact-messages/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
 
     /* ========================================= */
     /* CASE STUDIES */
