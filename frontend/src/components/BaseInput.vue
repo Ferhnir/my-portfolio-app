@@ -4,9 +4,10 @@ withDefaults(defineProps<{
     placeholder?: string
     name?: string
     required?: boolean
-    type?: 'text' | 'date' | 'url'
+    type?: 'text' | 'date' | 'url' | 'email'
     multiline?: boolean
     plain?: boolean
+    autocomplete?: string
 }>(), {
     placeholder: '',
     name: 'name',
@@ -14,6 +15,7 @@ withDefaults(defineProps<{
     type: 'text',
     multiline: false,
     plain: false,
+    autocomplete: undefined,
 })
 
 const model = defineModel<string>({ required: true })
@@ -35,10 +37,11 @@ const model = defineModel<string>({ required: true })
       :id="id"
       v-model="model"
       class="w-full bg-linear-field border border-linear-border text-linear-text text-xs font-cyber-display px-3 py-2 rounded-md outline-none focus:border-linear-border-hover"
-      :class="plain ? 'normal-case' : 'uppercase tracking-wide'"
+      :class="plain || type === 'email' ? 'normal-case' : 'uppercase tracking-wide'"
       :type="type"
       :name="name"
       :placeholder="placeholder"
       :required="required"
+      :autocomplete="autocomplete"
   >
 </template>

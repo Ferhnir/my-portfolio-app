@@ -45,7 +45,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/contact',
         name: 'contact',
-        component: () => import('@/pages/Placeholder.vue')
+        component: () => import('@/pages/Contact.vue')
     },
     {
         path: '/completed-tasks',

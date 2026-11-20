@@ -6,7 +6,9 @@ use App\Mail\ContactMessageReceived;
 use App\Models\ContactMessage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -20,6 +22,13 @@ class ContactMessageTest extends TestCase
 
         Cache::flush();
         Mail::fake();
+        Http::fake([
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify' => Http::response([
+                'success' => true,
+                'hostname' => 'portfolio.test',
+                'action' => 'contact',
+            ]),
+        ]);
     }
 
     public function test_guest_can_open_the_form(): void
@@ -66,6 +75,7 @@ class ContactMessageTest extends TestCase
             'email' => 'fast@example.com',
             'message' => 'Hello from the site.',
             'form_token' => $token,
+            'turnstile_token' => 'test-token',
         ])->assertCreated();
 
         $this->assertDatabaseCount('contact_messages', 0);
@@ -109,6 +119,42 @@ class ContactMessageTest extends TestCase
         $this->assertDatabaseCount('contact_messages', 1);
     }
 
+    public function test_a_failed_human_check_is_rejected(): void
+    {
+        Http::swap(new Factory);
+        Http::fake([
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify' => Http::response([
+                'success' => false,
+                'error-codes' => ['invalid-input-response'],
+            ]),
+        ]);
+
+        $this->postMessage('bot@example.com')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('turnstile_token');
+
+        $this->assertDatabaseCount('contact_messages', 0);
+        Mail::assertNothingSent();
+    }
+
+    public function test_the_visitor_address_comes_from_the_proxy(): void
+    {
+        $this->withServerVariables([
+            'REMOTE_ADDR' => '172.18.0.2',
+            'HTTP_X_FORWARDED_FOR' => '203.0.113.50',
+        ])->postMessage('one@example.com')->assertCreated();
+
+        $this->withServerVariables([
+            'REMOTE_ADDR' => '172.18.0.2',
+            'HTTP_X_FORWARDED_FOR' => '203.0.113.50',
+        ])->postMessage('two@example.com')->assertTooManyRequests();
+
+        $this->withServerVariables([
+            'REMOTE_ADDR' => '172.18.0.2',
+            'HTTP_X_FORWARDED_FOR' => '203.0.113.51',
+        ])->postMessage('three@example.com')->assertCreated();
+    }
+
     public function test_guest_cannot_read_the_inbox(): void
     {
         $this->getJson('/api/contact-messages')->assertUnauthorized();
@@ -144,6 +190,7 @@ class ContactMessageTest extends TestCase
             'email' => $email,
             'message' => 'Hello from the site.',
             'form_token' => $token,
+            'turnstile_token' => 'test-token',
             ...$extra,
         ]);
     }

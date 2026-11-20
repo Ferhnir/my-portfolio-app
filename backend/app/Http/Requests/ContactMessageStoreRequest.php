@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Services\ContactMessageService;
+use App\Services\TurnstileService;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -24,8 +25,20 @@ class ContactMessageStoreRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255'],
             'message' => ['required', 'string', 'max:5000'],
             'form_token' => ['required', 'string', $this->freshToken()],
+            'turnstile_token' => ['required', 'string', 'max:2048', $this->humanCheck()],
             'company_website' => ['nullable', 'string', 'max:255'],
         ];
+    }
+
+    private function humanCheck(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            $token = is_string($value) ? $value : '';
+
+            if (! app(TurnstileService::class)->verify($token, $this->ip())) {
+                $fail('The human check failed. Try again.');
+            }
+        };
     }
 
     private function freshToken(): Closure
